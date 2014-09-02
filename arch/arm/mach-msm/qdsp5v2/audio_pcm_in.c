@@ -16,6 +16,9 @@
  *
  */
 
+#include <asm/atomic.h>
+#include <asm/ioctls.h>
+
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/miscdevice.h>
@@ -23,15 +26,13 @@
 #include <linux/sched.h>
 #include <linux/wait.h>
 #include <linux/dma-mapping.h>
-#include <linux/msm_ion.h>
-
 #include <linux/msm_audio.h>
-
-#include <mach/msm_memtypes.h>
+#include <linux/msm_ion.h>
 #include <linux/memory_alloc.h>
+#include <mach/msm_memtypes.h>
 
-#include <asm/atomic.h>
-#include <asm/ioctls.h>
+#include <mach/iommu.h>
+#include <mach/iommu_domains.h>
 
 #include <mach/msm_adsp.h>
 #include <mach/socinfo.h>
@@ -111,6 +112,7 @@ struct audio_in {
 	/* data allocated for various buffers */
 	char *data;
 	dma_addr_t phys;
+	void *map_v_read;
 
 	int opened;
 	int enabled;
@@ -338,8 +340,9 @@ static void audpcm_in_get_dsp_frames(struct audio_in *audio)
 
 	index = audio->in_head;
 
-	frame = (void *) (((char *)audio->in[index].data) -
-			sizeof(*frame));
+	frame = (void *) (((char *)audio->in[index].data) - \
+			 sizeof(*frame));
+
 	spin_lock_irqsave(&audio->dsp_lock, flags);
 	audio->in[index].size = frame->frame_length;
 
@@ -350,10 +353,9 @@ static void audpcm_in_get_dsp_frames(struct audio_in *audio)
 	audio->in_head = (audio->in_head + 1) & (FRAME_NUM - 1);
 
 	/* If overflow, move the tail index foward. */
-	if (audio->in_head == audio->in_tail) {
+	if (audio->in_head == audio->in_tail)
 		audio->in_tail = (audio->in_tail + 1) & (FRAME_NUM - 1);
-		MM_ERR("Error! not able to keep up the read\n");
-	} else
+	else
 		audio->in_count++;
 
 	audpcm_dsp_read_buffer(audio, audio->dsp_cnt++);
@@ -790,9 +792,8 @@ static ssize_t audpcm_in_read(struct file *file,
 			}
 			spin_lock_irqsave(&audio->dsp_lock, flags);
 			if (index != audio->in_tail) {
-				/* overrun -- data is invalid and we need to
-				 * retry
-				 */
+				/* overrun -- data is
+				 * invalid and we need to retry */
 				spin_unlock_irqrestore(&audio->dsp_lock, flags);
 				continue;
 			}
@@ -907,7 +908,7 @@ static int audpcm_in_open(struct inode *inode, struct file *file)
 		goto output_buff_get_flags_error;
 	}
 
-	audio->data = ion_map_kernel(client, handle);
+	audio->map_v_read = ion_map_kernel(client, handle);
 	if (IS_ERR(audio->data)) {
 		MM_ERR("could not map read buffers,freeing instance 0x%08x\n",
 				(int)audio);
@@ -916,6 +917,8 @@ static int audpcm_in_open(struct inode *inode, struct file *file)
 	}
 	MM_DBG("read buf: phy addr 0x%08x kernel addr 0x%08x\n",
 		audio->phys, (int)audio->data);
+
+	audio->data = (char *)audio->map_v_read;
 
 	MM_DBG("Memory addr = 0x%8x  phy addr = 0x%8x\n",\
 		(int) audio->data, (int) audio->phys);

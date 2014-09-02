@@ -16,10 +16,8 @@
  *
  */
 
-
 #include <asm/atomic.h>
 #include <asm/ioctls.h>
-
 #include <linux/module.h>
 #include <linux/fs.h>
 #include <linux/miscdevice.h>
@@ -31,10 +29,10 @@
 #include <linux/memory_alloc.h>
 #include <linux/msm_ion.h>
 #include <mach/msm_memtypes.h>
-#include <mach/iommu.h>
-#include <mach/iommu_domains.h>
 
 #include <mach/msm_adsp.h>
+#include <mach/iommu.h>
+#include <mach/iommu_domains.h>
 #include <mach/qdsp5v2/qdsp5audreccmdi.h>
 #include <mach/qdsp5v2/qdsp5audrecmsg.h>
 #include <mach/qdsp5v2/audpreproc.h>
@@ -98,13 +96,15 @@ struct audio_in {
 	wait_queue_head_t write_wait;
 	int32_t out_phys; /* physical address of write buffer */
 	char *out_data;
+	void *map_v_read;
+	void *map_v_write;
+
 	int mfield; /* meta field embedded in data */
 	int wflush; /*write flush */
 	int rflush; /*read flush*/
 	int out_frame_cnt;
 
 	struct msm_adsp_module *audrec;
-
 
 	/* configuration to use on next enable */
 	uint32_t buffer_size; /* Frame size (36 bytes) */
@@ -135,8 +135,6 @@ struct audio_in {
 	/* data allocated for various buffers */
 	char *data;
 	dma_addr_t phys;
-	void *map_v_read;
-	void *map_v_write;
 
 	int opened;
 	int enabled;
