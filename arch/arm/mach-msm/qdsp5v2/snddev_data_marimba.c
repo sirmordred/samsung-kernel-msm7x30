@@ -3051,10 +3051,6 @@ static struct snddev_icodec_data handset_call_hac_rx_data = {
 	.min_voice_rx_vol[VOC_WB_INDEX] = -1700
 };
 static struct snddev_icodec_data handset_call_hac_tx_data = {
-	.default_sample_rate = 48000,
-	.pamp_on = msm_snddev_tx_route_config,
-	.pamp_off = msm_snddev_tx_route_deconfig,
-#else
 	.capability = (SNDDEV_CAP_TX | SNDDEV_CAP_VOICE),
 	.name = "handset_call_hac_tx",
 	.copp_id = 0,
