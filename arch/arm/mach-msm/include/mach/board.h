@@ -626,7 +626,7 @@ void msm_snddev_hsed_voltage_on(void);
 void msm_snddev_hsed_voltage_off(void);
 void msm_snddev_tx_route_config(void);
 void msm_snddev_tx_route_deconfig(void);
-#if defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_ANCORA_TMO) || defined(CONFIG_MACH_APACHE)
+#if defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_ANCORA_TMO)
 void msm_snddev_tx_ear_route_config(void);
 void msm_snddev_tx_ear_route_deconfig(void);
 #endif
@@ -636,14 +636,14 @@ void msm_snddev_audience_call_route_config(void);
 void msm_snddev_audience_call_route_deconfig(void);
 void msm_snddev_audience_call_route_speaker_config(void);
 void msm_snddev_audience_call_route_speaker_deconfig(void);
-void msm_snddev_audience_speaker_on(void);
-void msm_snddev_audience_speaker_off(void);
+int msm_snddev_audience_speaker_on(void);
+int msm_snddev_audience_speaker_off(void);
 void msm_snddev_audience_call_route_headset_config(void);
 void msm_snddev_audience_call_route_headset_deconfig(void);
-void msm_snddev_audience_poweramp_on_headset(void);
-void  msm_snddev_audience_poweramp_off_headset(void);
-void msm_snddev_setting_audience_call_connect(void);
-void msm_snddev_setting_audience_call_disconnect(void);
+int msm_snddev_audience_poweramp_on_headset(void);
+void msm_snddev_audience_poweramp_off_headset(void);
+int msm_snddev_setting_audience_call_connect(void);
+int msm_snddev_setting_audience_call_disconnect(void);
 #endif
 
 extern unsigned int msm_shared_ram_phys; /* defined in arch/arm/mach-msm/io.c */
