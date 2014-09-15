@@ -163,7 +163,7 @@ EXPORT_SYMBOL(switch_dev);
 static u64 msm_dmamask = DMA_BIT_MASK(32);
 #endif
 
-#define MSM_PMEM_ADSP_SIZE		0x1400000
+#define MSM_PMEM_ADSP_SIZE		0x1A00000
 
 #ifdef CONFIG_ION_MSM
 static struct platform_device ion_dev;
