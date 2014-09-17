@@ -77,17 +77,17 @@ enum {
 
 #define LCDC_FB_XRES	480
 #define LCDC_FB_YRES	800
-#define LCDC_HPW	2
+#define LCDC_HPW		4
 #define LCDC_HBP		20
-#define LCDC_HFP		20
+#define LCDC_HFP		100
 #define LCDC_VPW		2
 #define LCDC_VBP		5
 #define LCDC_VFP		5
 #define LCDC_PCLK		(LCDC_FB_XRES + LCDC_HBP + LCDC_HPW + LCDC_HFP) * (LCDC_FB_YRES + LCDC_VBP + LCDC_VPW + LCDC_VFP) * 2
 
-#define SMD_LCDC_HPW		4
+#define SMD_LCDC_HPW		8
 #define SMD_LCDC_HBP		40
-#define SMD_LCDC_HFP		10
+#define SMD_LCDC_HFP		50
 #define SMD_LCDC_VPW		1
 #define SMD_LCDC_VBP		7
 #define SMD_LCDC_VFP		6

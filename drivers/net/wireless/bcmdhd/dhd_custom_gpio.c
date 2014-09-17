@@ -1,6 +1,6 @@
 /*
 * Customer code to add GPIO control during WLAN start/stop
-* Copyright (C) 1999-2012, Broadcom Corporation
+* Copyright (C) 1999-2013, Broadcom Corporation
 * 
 *      Unless you and Broadcom execute a separate written software license
 * agreement governing use of this software, this software is licensed to you
@@ -20,7 +20,7 @@
 * software in any way with any other Broadcom software provided under a license
 * other than the GPL, without Broadcom's express prior written consent.
 *
-* $Id: dhd_custom_gpio.c 353167 2012-08-24 22:11:30Z $
+* $Id: dhd_custom_gpio.c 417465 2013-08-09 11:47:27Z $
 */
 
 #include <typedefs.h>
@@ -42,6 +42,8 @@ extern  void bcm_wlan_power_off(int);
 extern  void bcm_wlan_power_on(int);
 #endif /* CUSTOMER_HW */
 #if defined(CUSTOMER_HW2) || defined(CUSTOMER_HW4)
+
+
 #ifdef CONFIG_WIFI_CONTROL_FUNC
 int wifi_set_power(int on, unsigned long msec);
 int wifi_get_irq_number(unsigned long *irq_flags_ptr);
@@ -53,15 +55,15 @@ int wifi_get_irq_number(unsigned long *irq_flags_ptr) { return -1; }
 int wifi_get_mac_addr(unsigned char *buf) { return -1; }
 void *wifi_get_country_code(char *ccode) { return NULL; }
 #endif /* CONFIG_WIFI_CONTROL_FUNC */
-#endif /* CUSTOMER_HW2 || CUSTOMER_HW4 */
+#endif 
 
-#if defined(OOB_INTR_ONLY) || defined(BCMSPI_ANDROID)
+#if defined(OOB_INTR_ONLY)
 
 #if defined(BCMLXSDMMC)
 extern int sdioh_mmc_irq(int irq);
 #endif /* (BCMLXSDMMC)  */
 
-#ifdef CUSTOMER_HW3
+#if defined(CUSTOMER_HW3)
 #include <mach/gpio.h>
 #endif
 
@@ -112,11 +114,11 @@ int dhd_customer_oob_irq_map(unsigned long *irq_flags_ptr)
 	host_oob_irq = gpio_to_irq(dhd_oob_gpio_num);
 	gpio_direction_input(dhd_oob_gpio_num);
 #endif /* CUSTOMER_HW */
-#endif /* CUSTOMER_HW2 || CUSTOMER_HW4 */
+#endif 
 
 	return (host_oob_irq);
 }
-#endif /* defined(OOB_INTR_ONLY) || defined(BCMSPI_ANDROID) */
+#endif 
 
 /* Customer function to control hw specific wlan gpios */
 void
@@ -130,7 +132,7 @@ dhd_customer_gpio_wlan_ctrl(int onoff)
 			bcm_wlan_power_off(2);
 #endif /* CUSTOMER_HW */
 #if defined(CUSTOMER_HW2) || defined(CUSTOMER_HW4)
-			wifi_set_power(0, 0);
+			wifi_set_power(0, WIFI_TURNOFF_DELAY);
 #endif
 			WL_ERROR(("=========== WLAN placed in RESET ========\n"));
 		break;
@@ -197,6 +199,51 @@ dhd_custom_get_mac_address(unsigned char *buf)
 
 /* Customized Locale table : OPTIONAL feature */
 const struct cntry_locales_custom translate_custom_table[] = {
+/* Table should be filled out based on custom platform regulatory requirement */
+#ifdef EXAMPLE_TABLE
+	{"",   "XY", 4},  /* Universal if Country code is unknown or empty */
+	{"US", "US", 69}, /* input ISO "US" to : US regrev 69 */
+	{"CA", "US", 69}, /* input ISO "CA" to : US regrev 69 */
+	{"EU", "EU", 5},  /* European union countries to : EU regrev 05 */
+	{"AT", "EU", 5},
+	{"BE", "EU", 5},
+	{"BG", "EU", 5},
+	{"CY", "EU", 5},
+	{"CZ", "EU", 5},
+	{"DK", "EU", 5},
+	{"EE", "EU", 5},
+	{"FI", "EU", 5},
+	{"FR", "EU", 5},
+	{"DE", "EU", 5},
+	{"GR", "EU", 5},
+	{"HU", "EU", 5},
+	{"IE", "EU", 5},
+	{"IT", "EU", 5},
+	{"LV", "EU", 5},
+	{"LI", "EU", 5},
+	{"LT", "EU", 5},
+	{"LU", "EU", 5},
+	{"MT", "EU", 5},
+	{"NL", "EU", 5},
+	{"PL", "EU", 5},
+	{"PT", "EU", 5},
+	{"RO", "EU", 5},
+	{"SK", "EU", 5},
+	{"SI", "EU", 5},
+	{"ES", "EU", 5},
+	{"SE", "EU", 5},
+	{"GB", "EU", 5},
+	{"KR", "XY", 3},
+	{"AU", "XY", 3},
+	{"CN", "XY", 3}, /* input ISO "CN" to : XY regrev 03 */
+	{"TW", "XY", 3},
+	{"AR", "XY", 3},
+	{"MX", "XY", 3},
+	{"IL", "IL", 0},
+	{"CH", "CH", 0},
+	{"TR", "TR", 0},
+	{"NO", "NO", 0},
+#endif /* EXMAPLE_TABLE */
 };
 
 

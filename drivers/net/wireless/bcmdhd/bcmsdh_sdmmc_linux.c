@@ -1,7 +1,7 @@
 /*
  * BCMSDH Function Driver for the native SDIO/MMC driver in the Linux Kernel
  *
- * Copyright (C) 1999-2012, Broadcom Corporation
+ * Copyright (C) 1999-2013, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -21,7 +21,7 @@
  * software in any way with any other Broadcom software provided under a license
  * other than the GPL, without Broadcom's express prior written consent.
  *
- * $Id: bcmsdh_sdmmc_linux.c 381548 2013-01-28 17:25:38Z $
+ * $Id: bcmsdh_sdmmc_linux.c 404103 2013-05-23 20:07:27Z $
  */
 
 #include <typedefs.h>
@@ -110,6 +110,9 @@ static int bcmsdh_sdmmc_probe(struct sdio_func *func,
 	int ret = 0;
 	static struct sdio_func sdio_func_0;
 
+	if (!gInstance)
+		return -EINVAL;
+
 	if (func) {
 		sd_trace(("bcmsdh_sdmmc: %s Enter\n", __FUNCTION__));
 		sd_trace(("sdio_bcmsdh: func->class=%x\n", func->class));
@@ -124,8 +127,7 @@ static int bcmsdh_sdmmc_probe(struct sdio_func *func,
 			if(func->device == 0x4) { /* 4318 */
 				gInstance->func[2] = NULL;
 				sd_trace(("NIC found, calling bcmsdh_probe...\n"));
-				if (ret < 0 && gInstance)
-					gInstance->func[2] = NULL;
+				ret = bcmsdh_probe(&func->dev);
 			}
 		}
 
@@ -137,6 +139,8 @@ static int bcmsdh_sdmmc_probe(struct sdio_func *func,
 	#endif
 			sd_trace(("F2 found, calling bcmsdh_probe...\n"));
 			ret = bcmsdh_probe(&func->dev);
+			if (ret < 0)
+				gInstance->func[2] = NULL;
 		}
 	} else {
 		ret = -ENODEV;
@@ -195,11 +199,9 @@ static int bcmsdh_sdmmc_suspend(struct device *pdev)
 	if (func->num != 2)
 		return 0;
 
-	sd_trace_hw4(("%s Enter\n", __FUNCTION__));
-
+	sd_trace(("%s Enter\n", __FUNCTION__));
 	if (dhd_os_check_wakelock(bcmsdh_get_drvdata()))
 		return -EBUSY;
-
 	sdio_flags = sdio_get_host_pm_caps(func);
 
 	if (!(sdio_flags & MMC_PM_KEEP_POWER)) {
@@ -213,16 +215,12 @@ static int bcmsdh_sdmmc_suspend(struct device *pdev)
 		sd_err(("%s: error while trying to keep power\n", __FUNCTION__));
 		return ret;
 	}
-
 #if !defined(CUSTOMER_HW4)
 #if defined(OOB_INTR_ONLY)
 	bcmsdh_oob_intr_set(0);
-#endif	/* defined(OOB_INTR_ONLY) */
+#endif 
 #endif  /* !defined(CUSTOMER_HW4) */
 	dhd_mmc_suspend = TRUE;
-#if defined(CUSTOMER_HW4) && defined(CONFIG_ARCH_TEGRA)
-	irq_set_irq_wake(390, 1);
-#endif
 	smp_mb();
 
 	return 0;
@@ -233,21 +231,16 @@ static int bcmsdh_sdmmc_resume(struct device *pdev)
 #if !defined(CUSTOMER_HW4)
 #if defined(OOB_INTR_ONLY)
 	struct sdio_func *func = dev_to_sdio_func(pdev);
-#endif /* defined(OOB_INTR_ONLY) */
+	sd_trace(("%s Enter\n", __FUNCTION__));
+#endif
 #endif /* defined(CUSTOMER_HW4) */
-	sd_trace_hw4(("%s Enter\n", __FUNCTION__));
-
 	dhd_mmc_suspend = FALSE;
 #if !defined(CUSTOMER_HW4)
 #if defined(OOB_INTR_ONLY)
 	if ((func->num == 2) && dhd_os_check_if_up(bcmsdh_get_drvdata()))
 		bcmsdh_oob_intr_set(1);
-#endif /* (OOB_INTR_ONLY) */
+#endif 
 #endif /* !(CUSTOMER_HW4) */
-#if defined(CUSTOMER_HW4) && defined(CONFIG_ARCH_TEGRA)
-	if (func->num == 2)
-		irq_set_irq_wake(390, 0);
-#endif
 	smp_mb();
 	return 0;
 }
@@ -413,9 +406,9 @@ int sdio_function_init(void)
 		return -ENOMEM;
 
 	error = sdio_register_driver(&bcmsdh_sdmmc_driver);
-	if (error && gInstance) {
+	if (error) {
 		kfree(gInstance);
-		gInstance = 0;
+		gInstance = NULL;
 	}
 
 	return error;
@@ -432,6 +425,8 @@ void sdio_function_cleanup(void)
 
 	sdio_unregister_driver(&bcmsdh_sdmmc_driver);
 
-	if (gInstance)
+	if (gInstance) {
 		kfree(gInstance);
+		gInstance = NULL;
+	}
 }
