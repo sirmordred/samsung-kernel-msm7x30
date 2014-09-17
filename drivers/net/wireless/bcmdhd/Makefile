@@ -91,6 +91,6 @@ ifneq ($(CONFIG_DHD_USE_SCHED_SCAN),)
 DHDCFLAGS += -DWL_SCHED_SCAN
 endif
 EXTRA_CFLAGS = $(DHDCFLAGS)
-ifeq ($(CONFIG_BCMDHD),m)
+ifeq ($(CONFIG_BCMDHD),y)
 EXTRA_LDFLAGS += --strip-debug
 endif
