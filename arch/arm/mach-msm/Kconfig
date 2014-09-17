@@ -1681,7 +1681,7 @@ endchoice
 
 config MSM7KV2_AUDIO
 	bool "MSM7K v2 audio"
-	depends on (ARCH_MSM7X30 && ANDROID_PMEM)
+	depends on ARCH_MSM7X30
 	default y
 	help
 	  Enables QDSP5V2-based audio drivers for audio playbacks and
@@ -2419,7 +2419,7 @@ config MSM_ION_MM_USE_CMA
 
 config MSM_PMEM_ADSP_USE_CMA
 	bool "Use CMA for PMEM ADSP heap"
-	depends on ANDROID_PMEM && (MACH_ANCORA || MACH_ANCORA_TMO || MACH_APACHE || MACH_ARIESVE)
+	depends on ANDROID_PMEM_SUPPORT && (MACH_ANCORA || MACH_ANCORA_TMO || MACH_APACHE || MACH_ARIESVE)
 	select CMA
 	help
 	  Enable switching from PMEM bitmap allocator to DMA allocator for

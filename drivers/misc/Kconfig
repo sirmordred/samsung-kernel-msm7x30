@@ -51,7 +51,7 @@ config AD525X_DPOT_SPI
 	  To compile this driver as a module, choose M here: the
 	  module will be called ad525x_dpot-spi.
 
-config ANDROID_PMEM
+config ANDROID_PMEM_SUPPORT
 	bool "Android pmem allocator"
 	default y
 
