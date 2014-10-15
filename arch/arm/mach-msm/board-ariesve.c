@@ -4057,7 +4057,7 @@ static struct platform_device msm_migrate_pages_device = {
 	.id     = -1,
 };
 
-#ifdef CONFIG_ANDROID_PMEM
+#ifdef CONFIG_ANDROID_PMEM_SUPPORT
 #ifdef CONFIG_MSM_PMEM_ADSP_USE_CMA
 static struct platform_device pmem_adsp_heap_device = {
 	.name = "pmem-adsp-heap-device",
@@ -5273,7 +5273,7 @@ static struct platform_device *devices[] __initdata = {
 #ifdef CONFIG_FB_MSM_LCDC_S6E63M0_WVGA_PANEL
 	&lcdc_s6e63m0_panel_device,
 #endif
-#ifdef CONFIG_ANDROID_PMEM
+#ifdef CONFIG_ANDROID_PMEM_SUPPORT
 	&android_pmem_adsp_device,
 #endif
 	&msm_device_i2c,
@@ -7122,7 +7122,7 @@ static int __init fb_size_setup(char *p)
 }
 early_param("fb_size", fb_size_setup);
 
-#ifdef CONFIG_ANDROID_PMEM
+#ifdef CONFIG_ANDROID_PMEM_SUPPORT
 static unsigned pmem_adsp_size = MSM_PMEM_ADSP_SIZE;
 static int __init pmem_adsp_size_setup(char *p)
 {
@@ -7222,14 +7222,14 @@ static struct memtype_reserve msm7x30_reserve_table[] __initdata = {
 
 static void __init size_pmem_devices(void)
 {
-#ifdef CONFIG_ANDROID_PMEM
+#ifdef CONFIG_ANDROID_PMEM_SUPPORT
 	android_pmem_adsp_pdata.size = pmem_adsp_size;
 #endif
 }
 
 static void __init reserve_pmem_memory(void)
 {
-#if defined(CONFIG_ANDROID_PMEM) && !defined(CONFIG_MSM_PMEM_ADSP_USE_CMA)
+#if defined(CONFIG_ANDROID_PMEM_SUPPORT) && !defined(CONFIG_MSM_PMEM_ADSP_USE_CMA)
 	msm7x30_reserve_table[MEMTYPE_EBI0].size += android_pmem_adsp_pdata.size;
 #endif
 }
