@@ -55,13 +55,9 @@
     s5k4ecgx_sensor_write_list(A,(sizeof(A) / sizeof(A[0])),#A);
 #endif
 
-#if defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_APACHE)
-#define CAM_FLASH_ENSET 57
-#define CAM_FLASH_FLEN 56
-#else
-#define CAM_FLASH_ENSET 56
-#define CAM_FLASH_FLEN 57
-#endif
+
+#define CAM_FLASH_ENSET 1
+#define CAM_FLASH_FLEN 2
 #define FULL_FLASH 20
 #define PRE_FLASH 7
 #if defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_APACHE)

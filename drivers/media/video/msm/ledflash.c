@@ -34,13 +34,8 @@
 
 MODULE_LICENSE("GPL");
 
-#if defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_ANCORA_TMO)  || defined(CONFIG_MACH_APACHE)
-#define CAM_FLASH_ENSET 57
-#define CAM_FLASH_FLEN 56
-#else
 #define CAM_FLASH_ENSET 1
 #define CAM_FLASH_FLEN 2
-#endif
 
 static dev_t ledflash_dev;
 static struct cdev ledflash_cdev;
