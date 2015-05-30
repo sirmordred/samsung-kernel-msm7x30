@@ -9,7 +9,7 @@
 #include <linux/gpio.h>
 #include <linux/delay.h>
 #include <linux/irq.h>
-//
+
 #include <asm/gpio.h>
 #include <asm/io.h>
 
@@ -26,12 +26,6 @@
 //
 //============================================================
 
-//#include "ESCAPE_R01_V02.c" // Master Binary data
-//#include "MCS8000_R10_V05_bin.c"
-//#include "MCS8000_V98_bin.c"
-//#include "mcs8000_bin.c"
-//#include "MCS8000_bin_V73.c"
-//#include "MCS8000_bin_R11_V08.c"
 #if defined(CONFIG_MACH_ANCORA_TMO)
 #include "ANCORA_TMO_FW_R04_V06.c"
 #include "ANCORA_TMO_FW_R06_V13.c"
@@ -40,8 +34,7 @@
 #include "ANCORA_FW_R50_V15.c"
 #endif
  
-UINT8  ucVerifyBuffer[MELFAS_TRANSFER_LENGTH];		//	You may melloc *ucVerifyBuffer instead of this
-
+UINT8  ucVerifyBuffer[MELFAS_TRANSFER_LENGTH];
 
 //---------------------------------
 //	Downloading functions
@@ -105,8 +98,7 @@ static void mcsdl_print_result(int nRet);
 
 void melfas_send_download_enable_command(void)
 {
-	// TO DO : Fill this up
-
+	//Unused function
 }
 
 #endif
@@ -125,10 +117,10 @@ void melfas_send_download_enable_command(void)
 int mcsdl_ISC_download_binary_data(void)
 {
 	int nRet;
-	#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
+#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
 	melfas_send_download_enable_command();
 	mcsdl_delay(MCSDL_DELAY_100US);
-	#endif
+#endif
     
 	MELFAS_DISABLE_BASEBAND_ISR();					// Disable Baseband touch interrupt ISR.
 	MELFAS_DISABLE_WATCHDOG_TIMER_RESET();			// Disable Baseband watchdog timer
@@ -145,10 +137,10 @@ int mcsdl_ISC_download_binary_data(void)
 int mcsdl_ISC_download_binary_data_G2(void)
 {
 	int nRet;
-	#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
+#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
 	melfas_send_download_enable_command();
 	mcsdl_delay(MCSDL_DELAY_100US);
-	#endif
+#endif
     
 	MELFAS_DISABLE_BASEBAND_ISR();					// Disable Baseband touch interrupt ISR.
 	MELFAS_DISABLE_WATCHDOG_TIMER_RESET();			// Disable Baseband watchdog timer
@@ -165,10 +157,10 @@ int mcsdl_ISC_download_binary_data_G2(void)
 int mcsdl_download_binary_data(void)
 {
 	int nRet;
-	#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
+#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
 	melfas_send_download_enable_command();
 	mcsdl_delay(MCSDL_DELAY_100US);
-	#endif
+#endif
 
 	MELFAS_DISABLE_BASEBAND_ISR();					// Disable Baseband touch interrupt ISR.
 	MELFAS_DISABLE_WATCHDOG_TIMER_RESET();			// Disable Baseband watchdog timer
@@ -177,9 +169,9 @@ int mcsdl_download_binary_data(void)
 	// Run Download
 	//------------------------
 	nRet = mcsdl_download( (const UINT8*) MELFAS_binary, (const UINT16)MELFAS_binary_nLength , 0);
-	#if MELFAS_2CHIP_DOWNLOAD_ENABLE
+#if MELFAS_2CHIP_DOWNLOAD_ENABLE
     	nRet = mcsdl_download( (const UINT8*) MELFAS_binary_2, (const UINT16)MELFAS_binary_nLength_2, 1); // Slave Binary data download
-    #endif
+#endif
 	MELFAS_ROLLBACK_BASEBAND_ISR();					// Roll-back Baseband touch interrupt ISR.
 	MELFAS_ROLLBACK_WATCHDOG_TIMER_RESET();			// Roll-back Baseband watchdog timer
 
@@ -190,10 +182,10 @@ int mcsdl_download_binary_data(void)
 int mcsdl_download_binary_data_55T(void)
 {
 	int nRet;
-	#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
+#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
 	melfas_send_download_enable_command();
 	mcsdl_delay(MCSDL_DELAY_100US);
-	#endif
+#endif
 
 	MELFAS_DISABLE_BASEBAND_ISR();					// Disable Baseband touch interrupt ISR.
 	MELFAS_DISABLE_WATCHDOG_TIMER_RESET();			// Disable Baseband watchdog timer
@@ -214,10 +206,10 @@ int mcsdl_download_binary_data_55T(void)
 int mcsdl_download_binary_data_G2(void)
 {
 	int nRet;
-	#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
+#if MELFAS_USE_PROTOCOL_COMMAND_FOR_DOWNLOAD
 	melfas_send_download_enable_command();
 	mcsdl_delay(MCSDL_DELAY_100US);
-	#endif
+#endif
 
 	MELFAS_DISABLE_BASEBAND_ISR();					// Disable Baseband touch interrupt ISR.
 	MELFAS_DISABLE_WATCHDOG_TIMER_RESET();			// Disable Baseband watchdog timer
@@ -250,8 +242,8 @@ int mcsdl_download_binary_file(void)
 	//	   nBinary_length[0] : Firmware size(Master)
 	//	   nBinary_length[1] : Firmware size(Slave)
 	//	3. Run mcsdl_download( pBinary[IdxNum], nBinary_length[IdxNum], IdxNum);
-    //       IdxNum : 0 (Master Chip Download)
-    //       IdxNum : 1 (2Chip Download)
+    	//       IdxNum : 0 (Master Chip Download)
+   	//       IdxNum : 1 (2Chip Download)
 	//
 	//==================================================
 
@@ -263,15 +255,14 @@ int mcsdl_download_binary_file(void)
     MELFAS_DISABLE_BASEBAND_ISR();                  // Disable Baseband touch interrupt ISR.
     MELFAS_DISABLE_WATCHDOG_TIMER_RESET();          // Disable Baseband watchdog timer
 
-    for(i=0;i<=IdxNum;i++){
-    	if( pBinary[i] != NULL && nBinary_length[i] > 0 && nBinary_length[i] < 32*1024 ){
+    for(i=0;i<=IdxNum;i++) {
+    	if( pBinary[i] != NULL && nBinary_length[i] > 0 && nBinary_length[i] < 32*1024 ) {
 
     		//------------------------
     		// Run Download
     		//------------------------
     		nRet = mcsdl_download( (const UINT8 *)pBinary[i], (const UINT16)nBinary_length[i], i );
-    	}else{
-
+    	} else {
     		nRet = MCSDL_RET_WRONG_BINARY;
     	}
     }
@@ -279,14 +270,9 @@ int mcsdl_download_binary_file(void)
     MELFAS_ROLLBACK_BASEBAND_ISR();                 // Roll-back Baseband touch interrupt ISR.
     MELFAS_ROLLBACK_WATCHDOG_TIMER_RESET();         // Roll-back Baseband watchdog timer
     
-	#if MELFAS_ENABLE_DBG_PRINT
+#if MELFAS_ENABLE_DBG_PRINT
 	mcsdl_print_result( nRet );
-	#endif
-
-	#if 0
-		if( pData != NULL )										// free memory alloced.
-			free(pData);
-	#endif
+#endif
 
 	return ( nRet == MCSDL_RET_SUCCESS );
 
@@ -298,40 +284,40 @@ int mcsdl_download_binary_file(void)
 //
 //------------------------------------------------------------------
 
-static int mcsdl_download(const UINT8 *pBianry, const UINT16 unLength, INT8 IdxNum )
+static int mcsdl_download(const UINT8 *pBinary, const UINT16 unLength, INT8 IdxNum )
 {
 	int nRet;
 
 	//---------------------------------
 	// Check Binary Size
 	//---------------------------------
-	if( unLength >= MELFAS_FIRMWARE_MAX_SIZE ){
+	if( unLength >= MELFAS_FIRMWARE_MAX_SIZE ) {
 
 		nRet = MCSDL_RET_PROGRAM_SIZE_IS_WRONG;
 		goto MCSDL_DOWNLOAD_FINISH;
 	}
 
 
-	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
 	printk(" - Starting download...\n");
-	#endif
+#endif
 
 
 	//---------------------------------
 	// Make it ready
 	//---------------------------------
-	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
 	printk(" > Ready\n");
-	#endif
+#endif
 
 	mcsdl_set_ready();
 
 	//---------------------------------
 	// Erase Flash
 	//---------------------------------
-	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
 	printk(" > Erase\n");
-	#endif
+#endif
 
 	nRet = mcsdl_erase_flash(IdxNum);
 
@@ -341,28 +327,28 @@ static int mcsdl_download(const UINT8 *pBianry, const UINT16 unLength, INT8 IdxN
 	//---------------------------------
 	// Program Flash
 	//---------------------------------
-	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
 	printk(" > Program   ");
-	#endif
+#endif
 
-	nRet = mcsdl_program_flash( (UINT8*)pBianry, (UINT16)unLength, IdxNum );
+	nRet = mcsdl_program_flash( (UINT8*)pBinary, (UINT16)unLength, IdxNum );
 	if( nRet != MCSDL_RET_SUCCESS )
 		goto MCSDL_DOWNLOAD_FINISH;
 	//---------------------------------
 	// Verify flash
 	//---------------------------------
 
-	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
 	printk(" > Verify    ");
-	#endif
+#endif
 
-	nRet = mcsdl_verify_flash( (UINT8*)pBianry, (UINT16)unLength, IdxNum );
+	nRet = mcsdl_verify_flash( (UINT8*)pBinary, (UINT16)unLength, IdxNum );
 
 	if( nRet != MCSDL_RET_SUCCESS ) {
-		nRet = mcsdl_verify_flash( (UINT8*)pBianry, (UINT16)unLength, IdxNum );
+		nRet = mcsdl_verify_flash( (UINT8*)pBinary, (UINT16)unLength, IdxNum );
 
 		if( nRet != MCSDL_RET_SUCCESS ) {
-			nRet = mcsdl_verify_flash( (UINT8*)pBianry, (UINT16)unLength, IdxNum );
+			nRet = mcsdl_verify_flash( (UINT8*)pBinary, (UINT16)unLength, IdxNum );
 
 			if( nRet != MCSDL_RET_SUCCESS )
 				goto MCSDL_DOWNLOAD_FINISH;
@@ -375,14 +361,14 @@ static int mcsdl_download(const UINT8 *pBianry, const UINT16 unLength, INT8 IdxN
 
 MCSDL_DOWNLOAD_FINISH :
 
-	#if MELFAS_ENABLE_DBG_PRINT
-	mcsdl_print_result( nRet );								// Show result
-	#endif
+#if MELFAS_ENABLE_DBG_PRINT
+	mcsdl_print_result( nRet );
+#endif
 
-	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
 	printk(" > Rebooting\n");
 	printk(" - Fin.\n\n");
-	#endif
+#endif
 
 	mcsdl_reboot_mcs();
 
@@ -416,7 +402,7 @@ static int mcsdl_erase_flash(INT8 IdxNum)
 	mcsdl_read_flash_from( &readBuffer[16], 0x7FF0, 16, IdxNum);
 
 	// Compare with '0xFF'
-	for(i=0; i<32; i++){
+	for(i=0; i<32; i++) {
 		if( readBuffer[i] != 0xFF )
 			return MCSDL_RET_ERASE_FLASH_VERIFY_FAILED;
 	}
@@ -439,12 +425,10 @@ static int mcsdl_program_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxN
 	pData  = pDataOriginal;
 
     ucLength = MELFAS_TRANSFER_LENGTH;
-	
-//kang
 
-	while( (addr*4) < (int)unLength){
+	while( (addr*4) < (int)unLength) {
 
-        if( ( unLength - (addr*4) ) < MELFAS_TRANSFER_LENGTH ){
+        if( ( unLength - (addr*4) ) < MELFAS_TRANSFER_LENGTH ) {
             ucLength  = (UINT8)(unLength - (addr*4) );
         }
 
@@ -472,9 +456,9 @@ static int mcsdl_program_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxN
     	//---------------------------------
             addr +=1;
 
-		#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
 		printk("#");
-		#endif
+#endif
 
 
 		mcsdl_program_flash_part(pData);
@@ -488,7 +472,7 @@ static int mcsdl_program_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxN
 		
 	    mcsdl_delay(MCSDL_DELAY_40US);
 
-        for(i=0; i<6; i++){
+        for(i=0; i<6; i++) {
         
              if( i==2 ) mcsdl_delay(MCSDL_DELAY_20US);
             else if( i==3 ) mcsdl_delay(MCSDL_DELAY_40US);
@@ -496,10 +480,6 @@ static int mcsdl_program_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxN
             MCSDL_GPIO_SCL_SET_HIGH();  mcsdl_delay(MCSDL_DELAY_10US);
             MCSDL_GPIO_SCL_SET_LOW();   mcsdl_delay(MCSDL_DELAY_10US);
         }
-		
-    	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
-    	//printk("\n");
-    	#endif
 
     	mcsdl_unselect_isp_mode();
 		
@@ -545,9 +525,9 @@ static int mcsdl_verify_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxNu
 
 	ucLength  = MELFAS_TRANSFER_LENGTH;
 
-    while(  (addr*4) < (int)unLength){
+    while(  (addr*4) < (int)unLength) {
 
-        if( ( unLength -  (addr*4) ) < MELFAS_TRANSFER_LENGTH ){
+        if( ( unLength -  (addr*4) ) < MELFAS_TRANSFER_LENGTH ) {
             ucLength = (UINT8)(unLength -  (addr*4) );
         }
 
@@ -572,9 +552,9 @@ static int mcsdl_verify_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxNu
 
         addr+=1;
 
-    		#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
     		printk("#");
-    		#endif
+#endif
 
 
 
@@ -586,7 +566,7 @@ static int mcsdl_verify_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxNu
   
             MCSDL_GPIO_SDA_SET_HIGH();
 
-            for(i=0; i<6; i++){
+            for(i=0; i<6; i++) {
 
                  if( i==2 ) mcsdl_delay(MCSDL_DELAY_3US);
                 else if( i==3 ) mcsdl_delay(MCSDL_DELAY_40US);
@@ -599,17 +579,17 @@ static int mcsdl_verify_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxNu
     		// Comparing
     		//--------------------
 
-    		for(j=0; j<(int)ucLength; j++){
+    		for(j=0; j<(int)ucLength; j++) {
 
-    			#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
     			printk(" %02X", ucVerifyBuffer[j] );
-                #endif
+#endif
                 
-    			if( ucVerifyBuffer[j] != pData[j] ){
+    			if( ucVerifyBuffer[j] != pData[j] ) {
 
-    				#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
     				printk("\n [Error] Address : 0x%04X : 0x%02X - 0x%02X\n", addr, pData[j], ucVerifyBuffer[j] );
-                    #endif
+#endif
 
 
     				nRet = MCSDL_RET_PROGRAM_VERIFY_FAILED;
@@ -620,10 +600,6 @@ static int mcsdl_verify_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxNu
 
     		pData += ucLength;
 
-    		#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
-    		//printk("\n");
-    		#endif
-			 
 			mcsdl_unselect_isp_mode();
     	}
 
@@ -631,9 +607,9 @@ static int mcsdl_verify_flash( UINT8 *pDataOriginal, UINT16 unLength, INT8 IdxNu
 
 MCSDL_VERIFY_FLASH_FINISH:
 
-	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
 	printk("\n");
-	#endif
+#endif
 
 	mcsdl_unselect_isp_mode();
 
@@ -649,10 +625,10 @@ static void mcsdl_read_flash( UINT8 *pBuffer)
 
 	mcsdl_delay(MCSDL_DELAY_40US);
 
-    for (i=0; i< 5; i++){
+    for (i=0; i< 5; i++) {
         MCSDL_GPIO_SCL_SET_HIGH();  mcsdl_delay(MCSDL_DELAY_10US);
         MCSDL_GPIO_SCL_SET_LOW();  mcsdl_delay(MCSDL_DELAY_10US);
-        }
+    }
 
 		mcsdl_read_32bits( pBuffer );
 }
@@ -667,18 +643,18 @@ static int mcsdl_read_flash_from( UINT8 *pBuffer, UINT16 unStart_addr, UINT16 un
 	UINT16 addr;
 	UINT32 wordData;
 
-	if( unLength >= MELFAS_FIRMWARE_MAX_SIZE ){
+	if( unLength >= MELFAS_FIRMWARE_MAX_SIZE ) {
 		return MCSDL_RET_PROGRAM_SIZE_IS_WRONG;
 	}
 
 	addr  = 0;
 	ucLength  = MELFAS_TRANSFER_LENGTH;
 
-	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
 	printk(" %04X : ", unStart_addr );
-	#endif
+#endif
 
-	for( i = 0; i < (int)unLength; i+=(int)ucLength ){
+	for( i = 0; i < (int)unLength; i+=(int)ucLength ) {
 
 		addr = (UINT16)i;
      	if(IdxNum > 0) 
@@ -690,7 +666,7 @@ static int mcsdl_read_flash_from( UINT8 *pBuffer, UINT16 unStart_addr, UINT16 un
 
         mcsdl_write_bits( wordData, 18 );
 
-		if( ( unLength - addr ) < MELFAS_TRANSFER_LENGTH ){
+		if( ( unLength - addr ) < MELFAS_TRANSFER_LENGTH ) {
 
 			ucLength = (UINT8)(unLength - addr);
 		}
@@ -701,19 +677,15 @@ static int mcsdl_read_flash_from( UINT8 *pBuffer, UINT16 unStart_addr, UINT16 un
 		mcsdl_read_flash( &pBuffer[addr]);
 
 
-		#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
-		for(j=0; j<(int)ucLength; j++){
+#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
+		for(j=0; j<(int)ucLength; j++) {
 			printk("%02X ", pBuffer[j] );
 		}
-		#endif
+#endif
         
         mcsdl_unselect_isp_mode();
 
 	}
-
-	#if MELFAS_ENABLE_DBG_PROGRESS_PRINT
-	//printk("\n");
-	#endif
 
 	return MCSDL_RET_SUCCESS;
 
@@ -728,11 +700,6 @@ static void mcsdl_set_ready(void)
 
 	MCSDL_VDD_SET_LOW(); // power 
 
-	//MCSDL_CE_SET_LOW();
-	//MCSDL_CE_SET_OUTPUT();
-
-	//MCSDL_SET_GPIO_I2C();
-
 	MCSDL_GPIO_SDA_SET_LOW();
 	MCSDL_GPIO_SDA_SET_OUTPUT();
 
@@ -745,7 +712,6 @@ static void mcsdl_set_ready(void)
 	mcsdl_delay(MCSDL_DELAY_25MS);						// Delay for Stable VDD
 
 	MCSDL_VDD_SET_HIGH();
-	//MCSDL_CE_SET_HIGH();
 
 	MCSDL_GPIO_SDA_SET_HIGH();
 
@@ -777,34 +743,8 @@ static void mcsdl_reboot_mcs(void)
 
 	mcsdl_vdd_on();
  
-	msleep(300);	
-/*
-	MCSDL_VDD_SET_LOW();
+	msleep(300);
 
-	//MCSDL_CE_SET_LOW();
-	//MCSDL_CE_SET_OUTPUT();
-
-	MCSDL_GPIO_SDA_SET_HIGH();
-	MCSDL_GPIO_SDA_SET_OUTPUT();
-
-	MCSDL_GPIO_SCL_SET_HIGH();
-	MCSDL_GPIO_SCL_SET_OUTPUT();
-
-	//MCSDL_SET_HW_I2C();
-
-	MCSDL_RESETB_SET_LOW();
-	MCSDL_RESETB_SET_OUTPUT();
-
-	mcsdl_delay(MCSDL_DELAY_25MS);						// Delay for Stable VDD
-
-	MCSDL_RESETB_SET_INPUT();
-	MCSDL_VDD_SET_HIGH();
-
-	MCSDL_RESETB_SET_HIGH();
-	//MCSDL_CE_SET_HIGH();
-
-	mcsdl_delay(MCSDL_DELAY_30MS); 						// Delay '25 msec'
-*/
 }
 
 
@@ -854,9 +794,9 @@ static void mcsdl_select_isp_mode(UINT8 ucMode)
 	// Entering ISP mode : Part 2	- Only Mass Erase
 	//---------------------------------------------------
 
-	 if( ucMode == ISP_MODE_ERASE_FLASH   ){
+	 if( ucMode == ISP_MODE_ERASE_FLASH   ) {
         mcsdl_delay(MCSDL_DELAY_7US);
-		for(i=0; i<4; i++){
+		for(i=0; i<4; i++) {
 
 				 if( i==2 ) mcsdl_delay(MCSDL_DELAY_25MS);
 			else if( i==3 ) mcsdl_delay(MCSDL_DELAY_150US);
@@ -872,14 +812,11 @@ static void mcsdl_unselect_isp_mode(void)
 {
 	int i;
 
-	// MCSDL_GPIO_SDA_SET_HIGH();
-	// MCSDL_GPIO_SDA_SET_OUTPUT();
-
 	MCSDL_RESETB_SET_LOW();	
 
 	mcsdl_delay(MCSDL_DELAY_3US);
 	
-	for(i=0; i<10; i++){
+	for(i=0; i<10; i++) {
 
 		MCSDL_GPIO_SCL_SET_HIGH();	mcsdl_delay(MCSDL_DELAY_3US);
 		MCSDL_GPIO_SCL_SET_LOW();	mcsdl_delay(MCSDL_DELAY_3US);
@@ -895,11 +832,11 @@ static void mcsdl_read_32bits( UINT8 *pData )
 
 	MCSDL_GPIO_SDA_SET_INPUT();
 
-        for (i=3; i>=0; i--){
+        for (i=3; i>=0; i--) {
 
 		pData[i] = 0;
 
-		for (j=0; j<8; j++){
+		for (j=0; j<8; j++) {
 
 			pData[i] <<= 1;
 
@@ -922,7 +859,7 @@ static void mcsdl_write_bits(UINT32 wordData, int nBits)
 	MCSDL_GPIO_SDA_SET_LOW();
 	MCSDL_GPIO_SDA_SET_OUTPUT();
 
-	for (i=0; i<nBits; i++){
+	for (i=0; i<nBits; i++) {
 
 		if ( wordData & 0x80000000 ) {	MCSDL_GPIO_SDA_SET_HIGH();	}
 		else						 {	MCSDL_GPIO_SDA_SET_LOW();	}
@@ -1045,7 +982,7 @@ static void mcsdl_ISC_enter_download_mode()
 	mcsdl_i2c_stop();
 }
 
-static int mcsdl_ISC_download(const UINT8 *pBianry, const UINT16 unLength, INT8 IdxNum)
+static int mcsdl_ISC_download(const UINT8 *pBinary, const UINT16 unLength, INT8 IdxNum)
 {
 	int nRet;
 	int i=0;
@@ -1085,9 +1022,8 @@ static int mcsdl_ISC_download(const UINT8 *pBianry, const UINT16 unLength, INT8 
 		printk("<MELFAS> Public Configration download.\n");
 	}
 
-	//for (i = 0; i < 3; i++)
 	{
-		//if (dl_enable_bit & (1 << i))
+
 		{
 			//---------------------------------
 			// Make it ready
@@ -1133,12 +1069,9 @@ static int mcsdl_ISC_download(const UINT8 *pBianry, const UINT16 unLength, INT8 
 
 			fw_status = mcsdl_ISC_read_firmware_status();
 
-			if (fw_status == 0x01)
-			{
+			if (fw_status == 0x01) {
 				printk("<MELFAS> Firmware update mode enter success!!!\n");
-			}
-			else
-			{
+			} else {
 				printk("<MELFAS> Error detected!! firmware status is 0x%02x.\n", fw_status);
 				nRet = MCSDL_FIRMWARE_UPDATE_MODE_ENTER_FAILED;
 				goto MCSDL_DOWNLOAD_FINISH;
@@ -1150,7 +1083,7 @@ static int mcsdl_ISC_download(const UINT8 *pBianry, const UINT16 unLength, INT8 
 			// FIRMWARE UPDATE 
 			//--------------------------------------------------------------
 			printk("<MELFAS> FIRMWARE UPDATE\n\n");            
-			nRet = mcsdl_ISC_firmware_update((UINT8 *)pBianry, (UINT16)unLength, flash_start[0],flash_end[0]);
+			nRet = mcsdl_ISC_firmware_update((UINT8 *)pBinary, (UINT16)unLength, flash_start[0],flash_end[0]);
 
 			if(nRet != MCSDL_RET_SUCCESS) goto MCSDL_DOWNLOAD_FINISH;
 
@@ -1164,7 +1097,7 @@ static int mcsdl_ISC_download(const UINT8 *pBianry, const UINT16 unLength, INT8 
 MCSDL_DOWNLOAD_FINISH :
 
 #if MELFAS_ENABLE_DBG_PRINT
-			mcsdl_ISC_print_result( nRet );								// Show result
+			mcsdl_ISC_print_result( nRet );
 #endif
 
 #if MELFAS_ENABLE_DBG_PROGRESS_PRINT
@@ -1188,8 +1121,6 @@ static void mcsdl_ISC_set_ready(void)
 
 	MCSDL_VDD_SET_LOW(); // power 
 
-	//MCSDL_SET_GPIO_I2C();
-
 	MCSDL_GPIO_ISC_SDA_SET_OUTPUT(1);
 	MCSDL_GPIO_SDA_SET_HIGH();
 
@@ -1198,8 +1129,6 @@ static void mcsdl_ISC_set_ready(void)
 
 	MCSDL_RESETB_SET_INPUT();
 
-	//MCSDL_CE_SET_HIGH;
-	//MCSDL_CE_SET_OUTPUT();
 	mcsdl_delay(MCSDL_DELAY_60MS);						// Delay for Stable VDD
 
 	MCSDL_VDD_SET_HIGH();
@@ -1222,12 +1151,12 @@ static UINT8 mcsdl_ISC_read_data(UINT8 addr)
 	mcsdl_delay(MCSDL_DELAY_10MS);
 
 	mcsdl_i2c_start();
-	// 1byte read
+
 	wordData = (ISC_MODE_SLAVE_ADDRESS << 1 | 0x01) << 24;
 	mcsdl_ISC_write_bits( wordData, 8 );
 	flash_start = mcsdl_read_byte();
 	wordData = (0x01) << 31;
-	mcsdl_ISC_write_bits( wordData, 1 ); //Nack
+	mcsdl_ISC_write_bits( wordData, 1 );
 	mcsdl_i2c_stop();
 	return flash_start;
 }
@@ -1249,19 +1178,19 @@ static UINT8 mcsdl_ISC_read_firmware_status()
 	UINT32 wordData = 0x00000000;
 	UINT8 fw_status;
 	mcsdl_i2c_start();
-	// WRITE 0xAF
+
 	wordData = (ISC_MODE_SLAVE_ADDRESS << 1) << 24 | (0xAF << 16);
 	mcsdl_ISC_write_bits( wordData, 16 );
 	mcsdl_i2c_stop();
 	mcsdl_delay(MCSDL_DELAY_100MS);
 
 	mcsdl_i2c_start();
-	// 1byte read
+
 	wordData = (ISC_MODE_SLAVE_ADDRESS << 1 | 0x01) << 24;
 	mcsdl_ISC_write_bits( wordData, 8 );
 	fw_status = mcsdl_read_byte();
 	wordData = (0x01) << 31;
-	mcsdl_ISC_write_bits( wordData, 1 ); //Nack
+	mcsdl_ISC_write_bits( wordData, 1 );
 	mcsdl_i2c_stop();
 	return fw_status;
 }
@@ -1308,7 +1237,7 @@ static UINT8 mcsdl_ISC_firmware_update(UINT8 *_pBinary_reordered, UINT16 _unDown
 			CRC_send_buf = (CRC_send_buf<<4) | (XOR_bit_3 <<3) | (CRC_check_buf>>1 & 0x0007);
 			CRC_check_buf = CRC_send_buf;
 		}
-		//	printk("<MELFAS> CRC_check_buf 0x%02x, 0x%02x\n", (UINT8)(CRC_check_buf >> 8 & 0xFF), (UINT8)(CRC_check_buf & 0xFF));    				
+ 				
 #endif               
 		if (nOffset < _unDownload_size/1024 +1)
 		{
@@ -1320,7 +1249,6 @@ static UINT8 mcsdl_ISC_firmware_update(UINT8 *_pBinary_reordered, UINT16 _unDown
 					write_buffer[i*4+2] = _pBinary_reordered[(flash_start+nOffset)*1024+j*32+i*4+1];
 					write_buffer[i*4+1] = _pBinary_reordered[(flash_start+nOffset)*1024+j*32+i*4+2];
 					write_buffer[i*4+0] = _pBinary_reordered[(flash_start+nOffset)*1024+j*32+i*4+3];
-					//printk("<MELFAS> write buffer : 0x%02x,0x%02x,0x%02x,0x%02x\n", write_buffer[i*4+0],write_buffer[i*4+1],write_buffer[i*4+2],write_buffer[i*4+3]);
 #if MELFAS_CRC_CHECK_ENABLE
 					for (n = 0; n < 4; n++)
 					{
@@ -1336,7 +1264,6 @@ static UINT8 mcsdl_ISC_firmware_update(UINT8 *_pBinary_reordered, UINT16 _unDown
 							CRC_check_buf = CRC_send_buf;
 						}
 					}
-					//printk("<MELFAS> CRC_check_buf 0x%02x, 0x%02x\n", (UINT8)(CRC_check_buf >> 8 & 0xFF), (UINT8)(CRC_check_buf & 0xFF));
 #endif                               
 				}
 
@@ -1355,7 +1282,6 @@ static UINT8 mcsdl_ISC_firmware_update(UINT8 *_pBinary_reordered, UINT16 _unDown
 
 		wordData = (write_buffer[0] << 24) | (write_buffer[1]<< 16);
 		mcsdl_ISC_write_bits( wordData, 16 );
-		//printk("<MELFAS> CRC_data = 0x%02x 0x%02x\n",write_buffer[0],write_buffer[1]);
 		mcsdl_delay(MCSDL_DELAY_100US); 							
 #endif
 		mcsdl_i2c_stop();
@@ -1363,12 +1289,9 @@ static UINT8 mcsdl_ISC_firmware_update(UINT8 *_pBinary_reordered, UINT16 _unDown
 #if MELFAS_CRC_CHECK_ENABLE
 		fw_status = mcsdl_ISC_read_firmware_status();
 
-		if(fw_status == 0x03)
-		{
+		if(fw_status == 0x03) {
 			printk("<MELFAS> Firmware update success!!!\n");
-		}
-		else
-		{
+		} else {
 			printk("<MELFAS> Error detected!! firmware status is 0x%02x.\n", fw_status);
 			return MCSDL_FIRMWARE_UPDATE_FAILED;
 		}
@@ -1423,12 +1346,12 @@ static void mcsdl_delay(UINT32 nCount)
 		case MCSDL_DELAY_20US : 	
 			udelay(20); 
 			break;
-        case MCSDL_DELAY_40US :
-            udelay(40); 
-            break;  
-        case MCSDL_DELAY_70US :
-            udelay(70); 
-            break;             
+        	case MCSDL_DELAY_40US :
+            		udelay(40); 
+            		break;  
+        	case MCSDL_DELAY_70US :
+            		udelay(70); 
+            		break;             
 		case MCSDL_DELAY_100US :
 			udelay(100); 
 			break;          
@@ -1465,17 +1388,15 @@ static void mcsdl_delay(UINT32 nCount)
 		case MCSDL_DELAY_45MS :
 			msleep(45);
 			break;
-            break;
-        case MCSDL_DELAY_60MS :
-            msleep(60);
-            break;              
-        case MCSDL_DELAY_100MS :
-            mdelay(100);
-            break;
+        	case MCSDL_DELAY_60MS :
+            		msleep(60);
+            		break;              
+        	case MCSDL_DELAY_100MS :
+            		mdelay(100);
+            		break;
 		default : 
 			break;	
-	}// Please, Use your delay function
-
+	}
 
 }
 
@@ -1491,31 +1412,38 @@ static void mcsdl_delay(UINT32 nCount)
 
 static void mcsdl_print_result(int nRet)
 {
-	if( nRet == MCSDL_RET_SUCCESS ){
+	if( nRet == MCSDL_RET_SUCCESS ) {
 
 		printk(" > MELFAS Firmware downloading SUCCESS.\n");
 
-	}else{
+	} else {
 
 		printk(" > MELFAS Firmware downloading FAILED  :  ");
 
-		switch( nRet ){
+		switch( nRet ) {
 
-			case MCSDL_RET_SUCCESS                  		:   printk("MCSDL_RET_SUCCESS\n" );                 		break;
-			case MCSDL_RET_ERASE_FLASH_VERIFY_FAILED		:   printk("MCSDL_RET_ERASE_FLASH_VERIFY_FAILED\n" );		break;
-			case MCSDL_RET_PROGRAM_VERIFY_FAILED			:   printk("MCSDL_RET_PROGRAM_VERIFY_FAILED\n" );      	    break;
-
-			case MCSDL_RET_PROGRAM_SIZE_IS_WRONG			:   printk("MCSDL_RET_PROGRAM_SIZE_IS_WRONG\n" );    		break;
-			case MCSDL_RET_VERIFY_SIZE_IS_WRONG				:   printk("MCSDL_RET_VERIFY_SIZE_IS_WRONG\n" );      		break;
-			case MCSDL_RET_WRONG_BINARY						:   printk("MCSDL_RET_WRONG_BINARY\n" );      				break;
-
-			case MCSDL_RET_READING_HEXFILE_FAILED       	:   printk("MCSDL_RET_READING_HEXFILE_FAILED\n" );			break;
-			case MCSDL_RET_FILE_ACCESS_FAILED       		:   printk("MCSDL_RET_FILE_ACCESS_FAILED\n" );				break;
-			case MCSDL_RET_MELLOC_FAILED     		  		:   printk("MCSDL_RET_MELLOC_FAILED\n" );      			    break;
-
-			case MCSDL_RET_WRONG_MODULE_REVISION     		:   printk("MCSDL_RET_WRONG_MODULE_REVISION\n" );      	    break;
-
-			default                             			:	printk("UNKNOWN ERROR. [0x%02X].\n", nRet );      		break;
+			case MCSDL_RET_SUCCESS                  		:   printk("MCSDL_RET_SUCCESS\n" );
+				break;
+			case MCSDL_RET_ERASE_FLASH_VERIFY_FAILED		:   printk("MCSDL_RET_ERASE_FLASH_VERIFY_FAILED\n" );
+				break;
+			case MCSDL_RET_PROGRAM_VERIFY_FAILED			:   printk("MCSDL_RET_PROGRAM_VERIFY_FAILED\n" );
+				break;
+			case MCSDL_RET_PROGRAM_SIZE_IS_WRONG			:   printk("MCSDL_RET_PROGRAM_SIZE_IS_WRONG\n" );
+				break;
+			case MCSDL_RET_VERIFY_SIZE_IS_WRONG			:   printk("MCSDL_RET_VERIFY_SIZE_IS_WRONG\n" );
+				break;
+			case MCSDL_RET_WRONG_BINARY				:   printk("MCSDL_RET_WRONG_BINARY\n" );
+				break;
+			case MCSDL_RET_READING_HEXFILE_FAILED       		:   printk("MCSDL_RET_READING_HEXFILE_FAILED\n" );
+				break;
+			case MCSDL_RET_FILE_ACCESS_FAILED       		:   printk("MCSDL_RET_FILE_ACCESS_FAILED\n" );
+				break;
+			case MCSDL_RET_MELLOC_FAILED     		  	:   printk("MCSDL_RET_MELLOC_FAILED\n" );
+				break;
+			case MCSDL_RET_WRONG_MODULE_REVISION     		:   printk("MCSDL_RET_WRONG_MODULE_REVISION\n" );
+				break;
+			default                             			:   printk("UNKNOWN ERROR. [0x%02X].\n", nRet );
+				break;
 		}
 
 		printk("\n");
@@ -1525,30 +1453,34 @@ static void mcsdl_print_result(int nRet)
 
 static void mcsdl_ISC_print_result(int nRet)
 {
-	if( nRet == MCSDL_RET_SUCCESS )
-	{
+	if( nRet == MCSDL_RET_SUCCESS ) {
 		printk("<MELFAS> Firmware downloading SUCCESS.\n");
-	}
-	else
-	{
+	} else {
 		printk("<MELFAS> Firmware downloading FAILED  :  ");
-		switch( nRet )
-		{
-			case MCSDL_RET_SUCCESS :						printk("<MELFAS> MCSDL_RET_SUCCESS\n" );						break;
-			case MCSDL_FIRMWARE_UPDATE_MODE_ENTER_FAILED :	printk("<MELFAS> MCSDL_FIRMWARE_UPDATE_MODE_ENTER_FAILED\n" );	break;
-			case MCSDL_RET_PROGRAM_VERIFY_FAILED :			printk("<MELFAS> MCSDL_RET_PROGRAM_VERIFY_FAILED\n" );			break;
+		switch( nRet ) {
+			case MCSDL_RET_SUCCESS :					printk("<MELFAS> MCSDL_RET_SUCCESS\n" );
+				break;
+			case MCSDL_FIRMWARE_UPDATE_MODE_ENTER_FAILED :			printk("<MELFAS> MCSDL_FIRMWARE_UPDATE_MODE_ENTER_FAILED\n" );
+				break;
+			case MCSDL_RET_PROGRAM_VERIFY_FAILED :				printk("<MELFAS> MCSDL_RET_PROGRAM_VERIFY_FAILED\n" );
+				break;
+			case MCSDL_RET_PROGRAM_SIZE_IS_WRONG :				printk("<MELFAS> MCSDL_RET_PROGRAM_SIZE_IS_WRONG\n" );
+				break;
+			case MCSDL_RET_VERIFY_SIZE_IS_WRONG :				printk("<MELFAS> MCSDL_RET_VERIFY_SIZE_IS_WRONG\n" );
+				break;
+			case MCSDL_RET_WRONG_BINARY :					printk("<MELFAS> MCSDL_RET_WRONG_BINARY\n" );
+				break;
+			case MCSDL_RET_READING_HEXFILE_FAILED :				printk("<MELFAS> MCSDL_RET_READING_HEXFILE_FAILED\n" );
+				break;
+			case MCSDL_RET_FILE_ACCESS_FAILED :				printk("<MELFAS> MCSDL_RET_FILE_ACCESS_FAILED\n" );
+				break;
+			case MCSDL_RET_MELLOC_FAILED :					printk("<MELFAS> MCSDL_RET_MELLOC_FAILED\n" );
+				break;
+			case MCSDL_RET_WRONG_MODULE_REVISION :				printk("<MELFAS> MCSDL_RET_WRONG_MODULE_REVISION\n" );
+				break;
 
-			case MCSDL_RET_PROGRAM_SIZE_IS_WRONG :			printk("<MELFAS> MCSDL_RET_PROGRAM_SIZE_IS_WRONG\n" );			break;
-			case MCSDL_RET_VERIFY_SIZE_IS_WRONG :				printk("<MELFAS> MCSDL_RET_VERIFY_SIZE_IS_WRONG\n" );		break;
-			case MCSDL_RET_WRONG_BINARY :					printk("<MELFAS> MCSDL_RET_WRONG_BINARY\n" );					break;
-
-			case MCSDL_RET_READING_HEXFILE_FAILED :			printk("<MELFAS> MCSDL_RET_READING_HEXFILE_FAILED\n" );			break;
-			case MCSDL_RET_FILE_ACCESS_FAILED :				printk("<MELFAS> MCSDL_RET_FILE_ACCESS_FAILED\n" );				break;
-			case MCSDL_RET_MELLOC_FAILED :					printk("<MELFAS> MCSDL_RET_MELLOC_FAILED\n" );					break;
-
-			case MCSDL_RET_WRONG_MODULE_REVISION :			printk("<MELFAS> MCSDL_RET_WRONG_MODULE_REVISION\n" );			break;
-
-			default :										printk("<MELFAS> UNKNOWN ERROR. [0x%02X].\n", nRet );			break;
+			default :							printk("<MELFAS> UNKNOWN ERROR. [0x%02X].\n", nRet );
+				break;
 		}
 
 		printk("\n");
@@ -1588,41 +1520,19 @@ void mcsdl_delay_test(INT32 nCount)
 
 	MCSDL_GPIO_SCL_SET_HIGH();
 
-	for( i=0; i<nCount; i++ ){
-
-		#if 1
-
+	for( i=0; i<nCount; i++ ) {
+#if 1
 		MCSDL_GPIO_SCL_SET_LOW();
-
 		mcsdl_delay(MCSDL_DELAY_20US);
-
 		MCSDL_GPIO_SCL_SET_HIGH();
-
 		mcsdl_delay(MCSDL_DELAY_100US);
-
-		#elif 0
-
+#else
 		MCSDL_GPIO_SCL_SET_LOW();
-
-	   	mcsdl_delay(MCSDL_DELAY_500US);
-
-		MCSDL_GPIO_SCL_SET_HIGH();
-
-    	mcsdl_delay(MCSDL_DELAY_1MS);
-
-		#else
-
-		MCSDL_GPIO_SCL_SET_LOW();
-
-    	mcsdl_delay(MCSDL_DELAY_25MS);
-
+    		mcsdl_delay(MCSDL_DELAY_25MS);
 		TKEY_INTR_SET_LOW();
-
-    	mcsdl_delay(MCSDL_DELAY_45MS);
-
+    		mcsdl_delay(MCSDL_DELAY_45MS);
 		TKEY_INTR_SET_HIGH();
-
-    	#endif
+#endif
 	}
 
 	MCSDL_GPIO_SCL_SET_HIGH();
