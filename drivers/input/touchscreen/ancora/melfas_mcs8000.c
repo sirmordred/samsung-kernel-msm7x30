@@ -28,7 +28,7 @@
 
 #include <asm/io.h>
 #include <asm/gpio.h>
-#include <mach/vreg.h>
+#include <linux/regulator/consumer.h>
 
 #include <linux/slab.h>
 
@@ -65,7 +65,7 @@
 #define TS_READ_VERSION_ADDR	0x63
 
 static int debug_level = 5; 
-static struct vreg *vreg_ldo2;
+static struct regulator *vreg_ldo2;
 
 #define debugprintk(level,x...)  if(debug_level>=level) printk(x)
 
@@ -589,7 +589,7 @@ static ssize_t touch_led_control(struct device *dev, struct device_attribute *at
 #endif
 
 	if(data == 1 && led_state == TKEY_LED_OFF) {
-		rc = vreg_enable(vreg_ldo2);
+		rc = regulator_enable(vreg_ldo2);
 
 		if (rc) {
 			pr_err("%s: LDO2 vreg enable failed (%d)\n",
@@ -599,7 +599,7 @@ static ssize_t touch_led_control(struct device *dev, struct device_attribute *at
 
 		led_state = TKEY_LED_ON;
 	} else if(data == 2 && led_state == TKEY_LED_ON) {
-		rc = vreg_disable(vreg_ldo2);
+		rc = regulator_disable(vreg_ldo2);
 
 		if (rc) {
 			pr_err("%s: LDO2 vreg disable failed (%d)\n",
@@ -2176,14 +2176,14 @@ int melfas_mcs8000_ts_probe(struct i2c_client *client,
 
 
 	// KEYLED vdd
-	vreg_ldo2 = vreg_get(NULL, "xo_out");
+	vreg_ldo2 = regulator_get(NULL, "xo_out");
 	if (IS_ERR(vreg_ldo2)) {
 		rc = PTR_ERR(vreg_ldo2);
 		pr_err("%s: LDO2 vreg get failed (%d)\n",
 		       __func__, rc);
 	}
 
-	rc = vreg_set_level(vreg_ldo2, 3300);
+	rc = regulator_set_voltage(vreg_ldo2, 3300000 ,3300000);
 	if (rc) {
 		pr_err("%s: LDO2 vreg set level failed (%d)\n",
 		       __func__, rc);
@@ -2384,7 +2384,7 @@ int melfas_mcs8000_ts_suspend(pm_message_t mesg)
 	mcsdl_vdd_off();
 
 	if(led_state == TKEY_LED_ON) {
-		rc = vreg_disable(vreg_ldo2);
+		rc = regulator_disable(vreg_ldo2);
         
         printk("touch_led_control : ts_suspend forced off! rc = %d \n", rc);              
 
@@ -2423,7 +2423,7 @@ int melfas_mcs8000_ts_resume()
     enable_irq(melfas_mcs8000_ts->client->irq);  
 
     if(led_state == TKEY_LED_FORCEDOFF) { 
-        rc = vreg_enable(vreg_ldo2); 
+        rc = regulator_enable(vreg_ldo2); 
 
         printk("%s TKEY_LED_FORCEDOFF  rc = %d \n", __func__,rc);               
 

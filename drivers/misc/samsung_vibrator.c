@@ -11,10 +11,10 @@
 
 #include <mach/samsung_vibe.h>
 #include <linux/gpio.h>
-#include <mach/vreg.h>
+#include <linux/regulator/consumer.h>
 
 static struct hrtimer vibe_timer;
-static struct vreg *vreg_vib = NULL;
+static struct regulator *vreg_vib = NULL;
 
 static int is_vibe_on = 0;
 
@@ -63,7 +63,7 @@ static void set_pmic_vibrator(int on) {
 
 	if (on) {
 #if defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_APACHE)
-		rc = vreg_enable(vreg_vib);
+		rc = regulator_enable(vreg_vib);
 		if (rc) {
 			pr_err("%s: vreg_enable failed \n", __func__);
 		}
@@ -74,7 +74,7 @@ static void set_pmic_vibrator(int on) {
         }
         else if (board_hw_revision>= 2 )
         {
-            rc = vreg_enable(vreg_vib);
+            rc = regulator_enable(vreg_vib);
 	    	if (rc) {
 			pr_err("%s: vreg_enable failed \n", __func__);
 	    	}
@@ -84,7 +84,7 @@ static void set_pmic_vibrator(int on) {
 	} else {
 		if(is_vibe_on) {
 #if defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_APACHE)
-			rc = vreg_disable(vreg_vib);
+			rc = regulator_disable(vreg_vib);
 			if (rc) {
 				pr_err("%s: vreg_disable failed \n", __func__);
 			}
@@ -92,7 +92,7 @@ static void set_pmic_vibrator(int on) {
             if(board_hw_revision == 1) {
 		gpio_set_value(VIB_ON, VIBRATION_OFF);
             } else if ( board_hw_revision>= 2 ) {
-                    rc = vreg_disable(vreg_vib);
+                    rc = regulator_disable(vreg_vib);
         			if (rc) {
         				pr_err("%s: vreg_disable failed \n", __func__);
         			}
@@ -182,29 +182,29 @@ static int __devinit msm_vibrator_probe(struct platform_device *pdev) {
 	pr_info("[VIB] msm_vibrator_probe \n");
 
 #if defined(CONFIG_MACH_ANCORA) || defined(CONFIG_MACH_APACHE)
-	vreg_vib = vreg_get(NULL, "wlan2");
+	vreg_vib = regulator_get(NULL, "wlan2");
 
 	if (IS_ERR(vreg_vib)) {
 		pr_err("%s: wlan2 vreg get failed (%ld)",
 				__func__, PTR_ERR(vreg_vib));
 	}
 
-	rc = vreg_set_level(vreg_vib, 3300);
+	rc = regulator_set_voltage(vreg_vib, 3300000 ,3300000);
 	if (rc) {
 		pr_err("%s: vreg_set_level failed \n", __func__);
 	}
 #elif defined(CONFIG_MACH_ANCORA_TMO)
-	rc = vreg_set_level(vreg_vib, 3000);
+	rc = regulator_set_voltage(vreg_vib, 3000000 ,3000000);
 	if (rc) {
 		pr_err("%s: vreg_set_level failed \n", __func__);
 	}
 
         if(board_hw_revision>= 2) {
-	vreg_vib = vreg_get(NULL, "gp4");
+	vreg_vib = regulator_get(NULL, "gp4");
 		if (IS_ERR(vreg_vib)) {
 			pr_err("%s: gp4 vreg get failed (%ld)", __func__, PTR_ERR(vreg_vib));
 		}
-    	rc = vreg_set_level(vreg_vib, 3300);
+    	rc = regulator_set_voltage(vreg_vib, 3300000 ,3300000);
 		if (rc) {
 			pr_err("%s: vreg_set_level failed \n", __func__);
 		}

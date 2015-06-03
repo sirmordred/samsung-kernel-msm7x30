@@ -30,7 +30,7 @@
 #include <linux/slab.h>
 #include <linux/io.h>
 #include <mach/board.h>
-#include <mach/vreg.h>
+#include <linux/regulator/consumer.h>
 
 #ifdef CONFIG_SENSOR_SR030PC30_T679
 #include "sr030pc30_T679.h"
@@ -451,8 +451,8 @@ static int sr030pc30_regs_table_write(char *name)
 static void sr030pc30_set_power_rev00( int onoff)
 {
     unsigned int mclk_cfg; 
-    struct vreg *vreg_ldo20;
-    vreg_ldo20 = vreg_get(NULL, "gp13");
+    struct regulator *vreg_ldo20;
+    vreg_ldo20 = regulator_get(NULL, "gp13");
     mclk_cfg = GPIO_CFG(15, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA);
         
     if(!vreg_ldo20){
@@ -461,7 +461,7 @@ static void sr030pc30_set_power_rev00( int onoff)
 
     CAMDRV_DEBUG("(vreg_set_level(vreg_ldo20, 1800 \n");  
 
-    if(vreg_set_level(vreg_ldo20, 1800)){
+    if(regulator_set_voltage(vreg_ldo20, 1800000 ,1800000)){
         CAMDRV_DEBUG("[SR030PC30]%s: vreg_set_level failed\n", __func__);
     }
     if(onoff == 1) //POWER ON
@@ -508,7 +508,7 @@ static void sr030pc30_set_power_rev00( int onoff)
         lp8720_i2c_write(0x08, 0x36);
         mdelay(1);
 
-        if(vreg_enable(vreg_ldo20)){
+        if(regulator_enable(vreg_ldo20)){
             printk("[SR030PC30]%s: reg_enable failed\n", __func__);
         }
 
@@ -592,7 +592,7 @@ static void sr030pc30_set_power_rev00( int onoff)
         /* LP8720 enable */
         lp8720_i2c_write(0x08, 0x00);
 
-        if(vreg_disable(vreg_ldo20)){
+        if(regulator_disable(vreg_ldo20)){
             CAMDRV_DEBUG("[SR030PC30]%s: reg_enable failed\n", __func__);
         }
 
@@ -620,47 +620,47 @@ static void sr030pc30_set_power_rev00( int onoff)
 static void sr030pc30_set_power_rev01( int onoff)
 {
     unsigned int mclk_cfg; 
-    struct vreg *vreg_cam_out8_vddio;
-    struct vreg *vreg_cam_out9_vdda;
-    struct vreg *vreg_cam_out10_vddreg;
-    struct vreg *vreg_cam_out17_af; 
-    struct vreg *vreg_cam_gp15_vddreg;
+    struct regulator *vreg_cam_out8_vddio;
+    struct regulator *vreg_cam_out9_vdda;
+    struct regulator *vreg_cam_out10_vddreg;
+    struct regulator *vreg_cam_out17_af; 
+    struct regulator *vreg_cam_gp15_vddreg;
 
-    vreg_cam_out8_vddio        = vreg_get(NULL, "gp13");
-    vreg_cam_out9_vdda        = vreg_get(NULL, "wlan2");
-    vreg_cam_out10_vddreg    = vreg_get(NULL, "gp2");
-    vreg_cam_out17_af        = vreg_get(NULL, "wlan");
-    vreg_cam_gp15_vddreg    = vreg_get(NULL, "gp15");
+    vreg_cam_out8_vddio        = regulator_get(NULL, "gp13");
+    vreg_cam_out9_vdda        = regulator_get(NULL, "wlan2");
+    vreg_cam_out10_vddreg    = regulator_get(NULL, "gp2");
+    vreg_cam_out17_af        = regulator_get(NULL, "wlan");
+    vreg_cam_gp15_vddreg    = regulator_get(NULL, "gp15");
     mclk_cfg = GPIO_CFG(15, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA);
     
     if(onoff== 1) //POWER ON
     {
         CAMDRV_DEBUG("[START] SUB Camera Sensor POWER ON Sequence \n");
 
-        vreg_set_level(vreg_cam_out17_af,  2800);        // VDDAF 2.8V
-        vreg_set_level(vreg_cam_out9_vdda,  2800);        // VDDA 2.8V
-        vreg_set_level(vreg_cam_out10_vddreg, 1800);    // VGA Core 1.8V        
-        vreg_set_level(vreg_cam_out8_vddio,  1800);    // VDDIO 1.8V        
-        vreg_set_level(vreg_cam_gp15_vddreg,  1200);    // Mega Core VDD 1.2V            
+        regulator_set_voltage(vreg_cam_out17_af,  2800000 ,2800000);        // VDDAF 2.8V
+        regulator_set_voltage(vreg_cam_out9_vdda,  2800000 ,2800000);        // VDDA 2.8V
+        regulator_set_voltage(vreg_cam_out10_vddreg, 1800000 ,1800000);    // VGA Core 1.8V        
+        regulator_set_voltage(vreg_cam_out8_vddio,  1800000 ,1800000);    // VDDIO 1.8V        
+        regulator_set_voltage(vreg_cam_gp15_vddreg,  1200000 ,1200000);    // Mega Core VDD 1.2V            
 
         gpio_tlmm_config(GPIO_CFG(0, 2, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA) , GPIO_CFG_DISABLE);            
         gpio_tlmm_config(GPIO_CFG(1, 2, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA) , GPIO_CFG_DISABLE);                    
         mdelay(20);
         
         CAMDRV_DEBUG("Sensor AVDD 2.8V On \n");    
-        vreg_enable(vreg_cam_out9_vdda);
+        regulator_enable(vreg_cam_out9_vdda);
 
         CAMDRV_DEBUG("VT Sensor Core VDD_REG 1.8V On \n");                      
-        vreg_enable(vreg_cam_out10_vddreg);
+        regulator_enable(vreg_cam_out10_vddreg);
         udelay(20);
 
         CAMDRV_DEBUG("Main Sensor Core VDD 1.2V On \n");   
-        vreg_enable(vreg_cam_gp15_vddreg);        
+        regulator_enable(vreg_cam_gp15_vddreg);        
           udelay(15);
         
 
         CAMDRV_DEBUG("Sensor I/O VDDIO 1.8V On \n");                       
-        vreg_enable(vreg_cam_out8_vddio);
+        regulator_enable(vreg_cam_out8_vddio);
         mdelay(30);
 
         CAMDRV_DEBUG("I2C Enable \n");  
@@ -734,16 +734,16 @@ static void sr030pc30_set_power_rev01( int onoff)
         mdelay(1);
 
         CAMDRV_DEBUG("Sensor I/O VDDIO 1.8V OFF \n");                       
-        vreg_disable(vreg_cam_out8_vddio);
+        regulator_disable(vreg_cam_out8_vddio);
 
         CAMDRV_DEBUG("VT Sensor Core VDD_REG 1.8V OFF \n");                      
-        vreg_disable(vreg_cam_out10_vddreg);
+        regulator_disable(vreg_cam_out10_vddreg);
 
         CAMDRV_DEBUG("Sensor AVDD 2.8V OFF \n");    
-        vreg_disable(vreg_cam_out9_vdda);
+        regulator_disable(vreg_cam_out9_vdda);
 
         CAMDRV_DEBUG("Main Sensor Core VDD 1.2V OFF \n");   
-        vreg_disable(vreg_cam_gp15_vddreg);      
+        regulator_disable(vreg_cam_gp15_vddreg);      
 
         CAMDRV_DEBUG("I2C Disable \n"); 
         gpio_tlmm_config(GPIO_CFG(0, 2, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL, GPIO_CFG_16MA) , GPIO_CFG_DISABLE);            
@@ -771,21 +771,21 @@ static void sr030pc30_set_power(int onoff)
 void sr030pc30_set_power(int onoff)
 {
     unsigned int mclk_cfg; 
-    struct vreg *vreg_ldo20, *vreg_ldo11;
+    struct regulator *vreg_ldo20, *vreg_ldo11;
 
-    vreg_ldo20 = vreg_get(NULL, "gp13");
+    vreg_ldo20 = regulator_get(NULL, "gp13");
     if (!vreg_ldo20) {
         printk("[S5K4ECGX]%s: VREG L20 get failed\n", __func__);
     }
-    if (vreg_set_level(vreg_ldo20, 1800)) {
+    if (regulator_set_voltage(vreg_ldo20, 1800000 ,1800000)) {
         printk("[S5K4ECGX]%s: vreg_set_level failed\n", __func__);
     }
 
-    vreg_ldo11 = vreg_get(NULL, "gp2");
+    vreg_ldo11 = regulator_get(NULL, "gp2");
     if (!vreg_ldo11) {
         printk("[S5K4ECGX]%s: VREG L11 get failed\n", __func__);
     }
-    if (vreg_set_level(vreg_ldo11, 2800)) {
+    if (regulator_set_voltage(vreg_ldo11, 2800000 ,2800000)) {
         printk("[S5K4ECGX]%s: vreg_set_level failed\n", __func__);    
     }
     
@@ -805,10 +805,10 @@ void sr030pc30_set_power(int onoff)
         gpio_set_value(CAM_FLASH_ENSET, 0);
         gpio_set_value(CAM_FLASH_FLEN, 0);  
         
-        if (vreg_enable(vreg_ldo20)) {
+        if (regulator_enable(vreg_ldo20)) {
             printk("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!![SR030PC300]%s: reg_enable failed\n", __func__);
         }
-        if (vreg_enable(vreg_ldo11)) {
+        if (regulator_enable(vreg_ldo11)) {
             printk("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!![SR030PC300]%s: reg_enable failed\n", __func__);
         }
         mdelay(1);
@@ -840,10 +840,10 @@ void sr030pc30_set_power(int onoff)
         gpio_set_value(31, 0);    // VGA_STBY
         mdelay(1);
 
-        if (vreg_disable(vreg_ldo11)) {
+        if (regulator_disable(vreg_ldo11)) {
             printk("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!![SR030PC300]%s: reg_disable failed\n", __func__);
         }        
-        if (vreg_disable(vreg_ldo20)) {
+        if (regulator_disable(vreg_ldo20)) {
             printk("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!![SR030PC300]%s: reg_disable failed\n", __func__);
         }
         mdelay(1);
