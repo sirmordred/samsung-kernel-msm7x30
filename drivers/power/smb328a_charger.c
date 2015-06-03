@@ -27,26 +27,26 @@
 
 /* Register define */
 #define SMB328A_INPUT_AND_CHARGE_CURRENTS	0x00
-#define	SMB328A_CURRENT_TERMINATION			0x01
-#define SMB328A_FLOAT_VOLTAGE				0x02
-#define SMB328A_FUNCTION_CONTROL_A1			0x03
-#define SMB328A_FUNCTION_CONTROL_A2			0x04
-#define SMB328A_FUNCTION_CONTROL_B			0x05
+#define	SMB328A_CURRENT_TERMINATION		0x01
+#define SMB328A_FLOAT_VOLTAGE			0x02
+#define SMB328A_FUNCTION_CONTROL_A1		0x03
+#define SMB328A_FUNCTION_CONTROL_A2		0x04
+#define SMB328A_FUNCTION_CONTROL_B		0x05
 #define SMB328A_OTG_PWR_AND_LDO_CONTROL		0x06
 #define SMB328A_VARIOUS_CONTROL_FUNCTION_A	0x07
 #define SMB328A_CELL_TEMPERATURE_MONITOR	0x08
 #define SMB328A_INTERRUPT_SIGNAL_SELECTION	0x09
 #define SMB328A_I2C_BUS_SLAVE_ADDRESS		0x0A
 
-#define SMB328A_CLEAR_IRQ					0x30
-#define SMB328A_COMMAND						0x31
+#define SMB328A_CLEAR_IRQ				0x30
+#define SMB328A_COMMAND					0x31
 #define SMB328A_INTERRUPT_STATUS_A			0x32
-#define SMB328A_BATTERY_CHARGING_STATUS_A	0x33
+#define SMB328A_BATTERY_CHARGING_STATUS_A		0x33
 #define SMB328A_INTERRUPT_STATUS_B			0x34
-#define SMB328A_BATTERY_CHARGING_STATUS_B	0x35
-#define SMB328A_BATTERY_CHARGING_STATUS_C	0x36
+#define SMB328A_BATTERY_CHARGING_STATUS_B		0x35
+#define SMB328A_BATTERY_CHARGING_STATUS_C		0x36
 #define SMB328A_INTERRUPT_STATUS_C			0x37
-#define SMB328A_BATTERY_CHARGING_STATUS_D	0x38
+#define SMB328A_BATTERY_CHARGING_STATUS_D		0x38
 #define SMB328A_AUTOMATIC_INPUT_CURRENT_LIMMIT_STATUS	0x39
 
 enum {
@@ -108,44 +108,6 @@ static int smb328a_read_reg(struct i2c_client *client, int reg)
 	return ret;
 }
 
-#if 0
-static void smb328a_print_reg(struct i2c_client *client, int reg)
-{
-	u8 data = 0;
-
-	data = i2c_smbus_read_byte_data(client, reg);
-
-	if (data < 0)
-		dev_err(&client->dev, "%s: err %d\n", __func__, data);
-	else
-		printk("%s : reg (0x%x) = 0x%x\n", __func__, reg, data);
-}
-
-static void smb328a_print_all_regs(struct i2c_client *client)
-{
-	smb328a_print_reg(client, 0x31);
-	smb328a_print_reg(client, 0x32);
-	smb328a_print_reg(client, 0x33);
-	smb328a_print_reg(client, 0x34);
-	smb328a_print_reg(client, 0x35);
-	smb328a_print_reg(client, 0x36);
-	smb328a_print_reg(client, 0x37);
-	smb328a_print_reg(client, 0x38);
-	smb328a_print_reg(client, 0x39);
-	smb328a_print_reg(client, 0x00);
-	smb328a_print_reg(client, 0x01);
-	smb328a_print_reg(client, 0x02);
-	smb328a_print_reg(client, 0x03);
-	smb328a_print_reg(client, 0x04);
-	smb328a_print_reg(client, 0x05);
-	smb328a_print_reg(client, 0x06);
-	smb328a_print_reg(client, 0x07);
-	smb328a_print_reg(client, 0x08);
-	smb328a_print_reg(client, 0x09);
-	smb328a_print_reg(client, 0x0a);
-}
-#endif
-
 static void smb328a_allow_volatile_writes(struct i2c_client *client)
 {
 	int val;
@@ -177,7 +139,6 @@ static void smb328a_set_command_reg(struct i2c_client *client)
 		data = (u8)val;
 		dev_info(&client->dev, "%s : reg (0x%x) = 0x%x\n", __func__, SMB328A_COMMAND, data);
 		if (chip->chg_mode == CHG_MODE_AC)
-//			data = 0xad;
 			data = 0x8C;
 		else
 			data = 0x88; /* usb or misc or unknown */
@@ -213,12 +174,6 @@ static void smb328a_charger_function_conrol(struct i2c_client *client)
 	if (val >= 0) {
 		data = (u8)val;
 		dev_info(&client->dev, "%s : reg (0x%x) = 0x%x\n", __func__, SMB328A_INPUT_AND_CHARGE_CURRENTS, data);
-#if 0
-		if (chip->chg_mode == CHG_MODE_AC) {
-			set_data = 0x97;
-		} else
-			set_data = 0x17;
-#endif
 		set_data = 0x75;
 		if (data != set_data) { /* this can be changed with top-off setting */
 			data = set_data;
@@ -236,12 +191,6 @@ static void smb328a_charger_function_conrol(struct i2c_client *client)
 	if (val >= 0) {
 		data = (u8)val;
 		dev_info(&client->dev, "%s : reg (0x%x) = 0x%x\n", __func__, SMB328A_CURRENT_TERMINATION, data);
-#if 0
-		if (chip->chg_mode == CHG_MODE_AC) {
-			set_data = 0x90;
-		} else
-			set_data = 0x10;
-#endif
 #ifdef CONFIG_MACH_APACHE
 		set_data = 0x54;/* HW req : chg current 600mA -> 700 mA */
 #else
@@ -405,8 +354,6 @@ static int smb328a_check_charging_status(struct i2c_client *client)
 	u8 data = 0;
 	int ret = -1;
 
-	//printk("%s : \n", __func__);
-
 	val = smb328a_read_reg(client, SMB328A_BATTERY_CHARGING_STATUS_C);
 	if (val >= 0) {
 		data = (u8)val;
@@ -424,8 +371,6 @@ static bool smb328a_check_is_charging(struct i2c_client *client)
 	int val;
 	u8 data = 0;
 	bool ret = false;
-
-	//printk("%s : \n", __func__);
 
 	val = smb328a_read_reg(client, SMB328A_BATTERY_CHARGING_STATUS_C);
 	if (val >= 0) {
@@ -445,12 +390,9 @@ static bool smb328a_check_bat_full(struct i2c_client *client)
 	u8 data = 0;
 	bool ret = false;
 
-	//printk("%s : \n", __func__);
-
 	val = smb328a_read_reg(client, SMB328A_BATTERY_CHARGING_STATUS_C);
 	if (val >= 0) {
 		data = (u8)val;
-		//printk("%s : reg (0x%x) = 0x%x\n", __func__, SMB328A_BATTERY_CHARGING_STATUS_C, data);
 
 		if (data&(0x1<<6))
 			ret = true; /* full */
@@ -466,16 +408,7 @@ static bool smb328a_check_bat_missing(struct i2c_client *client)
 	u8 data = 0;
 	bool ret = false;
 
-	//printk("%s : \n", __func__);
-
 	val = smb328a_read_reg(client, SMB328A_BATTERY_CHARGING_STATUS_B);
-
-//	printk("[SSAM] %s value : %d \n", __func__, val);
-
-#if 0
-	if(val > 0)
-		ret = true; /* missing battery */
-#endif
 
 	if (val >= 0) {
 		data = (u8)val;
@@ -505,8 +438,6 @@ static bool smb328a_read_chg_status(struct i2c_client *client, unsigned int *sta
 	else
 		*status = int_status_C << 24 | status_A << 16 | status_B << 8 | status_C ;
 
-	//printk("%s : %x %x %x %x , %x\n", __func__, int_status_C, status_A, status_B, status_C, *status);
-
 	return true;
 }
 
@@ -520,7 +451,6 @@ static bool smb328a_check_vdcin(struct i2c_client *client)
 	val = smb328a_read_reg(client, SMB328A_BATTERY_CHARGING_STATUS_A);
 	if (val >= 0) {
 		data = (u8)val;
-		//printk("%s : reg (0x%x) = 0x%x\n", __func__, SMB328A_BATTERY_CHARGING_STATUS_A, data);
 
 		if (data&(0x1<<1))
 			ret = true;
@@ -538,7 +468,6 @@ static bool smb328a_check_bmd_disabled(struct i2c_client *client)
 	val = smb328a_read_reg(client, SMB328A_FUNCTION_CONTROL_B);
 	if (val >= 0) {
 		data = (u8)val;
-//		printk("%s : reg (0x%x) = 0x%x\n", __func__, SMB328A_FUNCTION_CONTROL_B, data);
 
 		if (data&(0x1<<7)) {
 			ret = true;
@@ -551,7 +480,6 @@ static bool smb328a_check_bmd_disabled(struct i2c_client *client)
 	val = smb328a_read_reg(client, SMB328A_OTG_PWR_AND_LDO_CONTROL);
 	if (val >= 0) {
 		data = (u8)val;
-		//printk("%s : reg (0x%x) = 0x%x\n", __func__, SMB328A_OTG_PWR_AND_LDO_CONTROL, data);
 
 		if ((data&(0x1<<7))==0) {
 			ret = true;
@@ -590,14 +518,11 @@ static int smb328a_chg_get_property(struct power_supply *psy,
 			val->intval = BAT_DETECTED;
 		break;
 	case POWER_SUPPLY_PROP_ONLINE:
-		//printk("%s : check bmd available\n", __func__);
-		//smb328a_print_all_regs(chip->client);
 		/* check VF check available */
 		if (smb328a_check_bmd_disabled(chip->client))
 			val->intval = 1;
 		else
 			val->intval = 0;
-//		printk("smb328a_check_bmd_disabled is %d\n", val->intval);
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL:
 		if (smb328a_check_bat_full(chip->client))
@@ -763,7 +688,6 @@ static int smb328a_disable_otg(struct i2c_client *client)
 		msleep(100);
 		data = smb328a_read_reg(client, SMB328A_COMMAND);
 		dev_info(&client->dev, "%s : => reg (0x%x) = 0x%x\n", __func__, SMB328A_COMMAND, data);
-		//fsa9480_otg_detach();
 	}
 	return 0;
 }
@@ -998,10 +922,8 @@ static int smb328a_chg_set_property(struct power_supply *psy,
 
 	switch (psp) {
 	case POWER_SUPPLY_PROP_CURRENT_NOW: /* step1) Set charging current */
-		//smb328a_set_command_reg(chip->client);
 		smb328a_charger_function_conrol(chip->client);
 		ret = smb328a_set_charging_current(chip->client, val->intval);
-		//smb328a_print_all_regs(chip->client);
 		break;
 	case POWER_SUPPLY_PROP_CHARGE_FULL: /* step2) Set top-off current */
 		if (val->intval < 25 || val->intval > 200) {
@@ -1018,33 +940,10 @@ static int smb328a_chg_set_property(struct power_supply *psy,
 		break;
 	case POWER_SUPPLY_PROP_STATUS: /* step4) Enable/Disable charging */
 		if (val->intval == POWER_SUPPLY_STATUS_CHARGING) {
-#if 0
-			if (chip->chg_mode != CHG_MODE_USB)
-				smb328a_ldo_disable(chip->client);
-#endif
 			ret = smb328a_enable_charging(chip->client);
-#if 0
-			if (chip->batt_vcell > 3900) {
-				smb328a_chgen_bit_control(chip->client, false);
-				smb328a_chgen_bit_control(chip->client, true);
-			}
-#endif
 		} else
-
 			ret = smb328a_disable_charging(chip->client);
-		//smb328a_print_all_regs(chip->client);
 		break;
-#if 0
-	case POWER_SUPPLY_PROP_OTG:	
-		if (val->intval == POWER_SUPPLY_CAPACITY_OTG_ENABLE)
-		{
-			smb328a_charger_function_conrol(chip->client);		
-			ret = smb328a_enable_otg(chip->client);
-		}
-		else
-			ret = smb328a_disable_otg(chip->client);
-		break;
-#endif
 	default:
 		return -EINVAL;
 	}
@@ -1088,7 +987,6 @@ static ssize_t sec_smb328a_show_property(struct device *dev,
 		val = smb328a_read_reg(chip->client, SMB328A_BATTERY_CHARGING_STATUS_C);
 		if (val >= 0) {
 			data = (u8)val;
-			//printk("%s : reg (0x%x) = 0x%x\n", __func__, SMB328A_BATTERY_CHARGING_STATUS_C, data);
 			i += scnprintf(buf + i, PAGE_SIZE - i, "0x%x (bit6 : %d)\n",
 					data, (data&0x40)>>6);
 		} else {
@@ -1140,8 +1038,6 @@ static int __devinit smb328a_probe(struct i2c_client *client,
 	chip->pdata = client->dev.platform_data;
 
 	i2c_set_clientdata(client, chip);
-
-//	chip->pdata->hw_init(); /* important */
 	
 	chip->psy_bat.name = "smb328a-charger",
 	chip->psy_bat.type = POWER_SUPPLY_TYPE_BATTERY,
@@ -1156,10 +1052,6 @@ static int __devinit smb328a_probe(struct i2c_client *client,
 	}
 
 	chip->chg_mode = CHG_MODE_NONE;
-	//smb328a_charger_function_conrol(client);
-	//smb328a_print_all_regs(client);
-
-//	printk("[SSAM] smb328a syfs create!!! \n");
 
 	/* create smb328a attributes */
 	smb328a_create_attrs(chip->psy_bat.dev);
@@ -1167,12 +1059,8 @@ static int __devinit smb328a_probe(struct i2c_client *client,
 	if(board_hw_revision >= CONFIG_HW_REV_USING_SMB328)
 	{
 		/* Enable batt init */
-		if(p_batt_init != NULL)
-		{
-	//		printk("[SSAM] Run workqueue.\n");
-			if (work_pending(p_batt_init))
-			{
-	//			printk("[SSAM] check pending workqueue.\n");
+		if(p_batt_init != NULL) {
+			if (work_pending(p_batt_init)) {
 				cancel_delayed_work(p_batt_init);
 				schedule_work(p_batt_init);
 			}
