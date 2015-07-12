@@ -35,8 +35,6 @@ static int delayed_backlight_value = -1;
 static boolean First_Disp_Power_On = FALSE;
 static int lcd_brightness = -1;
 
-extern unsigned long acpuclk_usr_set_max(void);
-
 static struct samsung_state_type samsung_state = { .brightness = 180 };
 static struct msm_panel_common_pdata *lcdc_samsung_pdata;
 extern unsigned int board_lcd_hw_revision;
@@ -697,7 +695,6 @@ static int lcdc_samsung_panel_on(struct platform_device *pdev)
 	pr_info("%s\n", __func__);
 	if (!samsung_state.disp_initialized) {
 
-		acpuclk_usr_set_max();
 		lcdc_samsung_pdata->panel_config_gpio(1);
 		samsung_spi_init();	
 		samsung_disp_powerup();
@@ -1073,7 +1070,6 @@ static int lcdc_samsung_panel_on_esd(struct platform_device *pdev)
 	pr_info("%s\n", __func__);
 	if (!samsung_state.disp_initialized) {
 
-		acpuclk_usr_set_max();
 		lcdc_samsung_pdata->panel_config_gpio(1);
 		samsung_spi_init();
 		samsung_disp_powerup();
