@@ -160,6 +160,7 @@ static struct s5k4ecgx_enum_framesize s5k4ecgx_framesize_list[] = { //TELECA_TOU
 static struct s5k4ecgx_status_struct s5k4ecgx_status;
 
 bool isPreviewReturnWrite = false;
+bool torch_mode_on;
 static unsigned int i2c_retry = 0;
 static unsigned int probe_init_retry = 0;
 static int HD_mode = 0;
@@ -982,40 +983,74 @@ static int s5k4ecgx_get_lux(int* lux)
     return cur_lux; //this value is under 0x0032 in low light condition 
 }
 
-static  int s5k4ecgx_set_flash(int lux_val)
+static int s5k4ecgx_factory_flash(int lux_val)
 {
+	int i = 0;
+
+	CAMDRV_DEBUG("%s, flash set is %d\n", __func__, lux_val);
+
+	if (lux_val == 0) {
+		gpio_set_value_cansleep(CAM_FLASH_ENSET, 0);
+		return 0;
+		}
+
+	/* initailize falsh IC */
+	gpio_set_value_cansleep(CAM_FLASH_ENSET, 0);
+	gpio_set_value_cansleep(CAM_FLASH_FLEN, 0);
+	usleep(1000);		/*to enter a shutdown mode */
+
+	/* set to movie mode */
+	CAMDRV_DEBUG("%s, flash set is %d\n", __func__, lux_val);
+
+	for (i = 0; i < lux_val; i++) {
+		udelay(1);
+		gpio_set_value_cansleep(CAM_FLASH_ENSET, 1);
+		udelay(1);
+		gpio_set_value_cansleep(CAM_FLASH_ENSET, 0);
+	}
+	gpio_set_value_cansleep(CAM_FLASH_ENSET, 1);
+
+	return 0;
+}
+
+static int s5k4ecgx_set_flash(int lux_val)
+{
+
+    if (torch_mode_on)
+    	return 0;
+
     int i = 0;
 
     CAMDRV_DEBUG("%s, flash set is %d\n", __func__, lux_val);
 
     /* initailize falsh IC */
-    gpio_set_value(CAM_FLASH_ENSET,0);
-    gpio_set_value(CAM_FLASH_FLEN,0);
+    gpio_set_value_cansleep(CAM_FLASH_ENSET, 0);
+    gpio_set_value_cansleep(CAM_FLASH_FLEN, 0);
     mdelay(1); // to enter a shutdown mode
 
     extern int batt_temp_adc_info;
     
     /* set to flash mode */
 
-    if(batt_temp_adc_info>1800 && lux_val>0) // lux_val!=PRE_FLASH_OFF && lux_val!=FLASH_OFF)    // Very low temperature.
+    if(batt_temp_adc_info > 1800 && lux_val > 0) // lux_val!=PRE_FLASH_OFF && lux_val!=FLASH_OFF)    // Very low temperature.
     {
         /* set to movie mode */
         S5K4ECGX_WRITE_LIST(s5k4ecgx_Pre_Flash_On);
         
-        for(i=0;i<7;i++)
+        for(i = 0; i < 7; i++)
         {
             udelay(1);
-            gpio_set_value(CAM_FLASH_ENSET,1);
+            gpio_set_value_cansleep(CAM_FLASH_ENSET, 1);
             udelay(1);
-            gpio_set_value(CAM_FLASH_ENSET,0);
+            gpio_set_value_cansleep(CAM_FLASH_ENSET, 0);
         }
         
-        gpio_set_value(CAM_FLASH_ENSET,1); //value set
+        gpio_set_value_cansleep(CAM_FLASH_ENSET, 1); //value set
     }
-    else if(lux_val>16) // FULL_FLASH
+    else if(lux_val > 16) // FULL_FLASH
     {
         S5K4ECGX_WRITE_LIST(s5k4ecgx_Main_Flash_On);
-        gpio_set_value(CAM_FLASH_FLEN,1);
+        gpio_set_value_cansleep(CAM_FLASH_FLEN, 1);
         s5k4ecgx_status.flash_exifinfo = true;
 #ifdef USE_FLASHOFF_TIMER
         add_timer(&flashoff_timer); // for prevent LED 
@@ -1028,32 +1063,35 @@ static  int s5k4ecgx_set_flash(int lux_val)
         for(i=0;i<lux_val;i++)
         {
             udelay(1);
-            gpio_set_value(CAM_FLASH_ENSET,1);
+            gpio_set_value_cansleep(CAM_FLASH_ENSET, 1);
             udelay(1);
-            gpio_set_value(CAM_FLASH_ENSET,0);
+            gpio_set_value_cansleep(CAM_FLASH_ENSET, 0);
         }
-        gpio_set_value(CAM_FLASH_ENSET,1); //value set
+        gpio_set_value_cansleep(CAM_FLASH_ENSET, 1); //value set
         s5k4ecgx_status.flash_exifinfo = true;
     }
-    else if(lux_val > 0 &&  lux_val<=16) // PRE_FLASH, MOVIE_FLASH
+    else if(lux_val > 0 &&  lux_val <= 16) // PRE_FLASH, MOVIE_FLASH
     {
         /* set to movie mode */
         S5K4ECGX_WRITE_LIST(s5k4ecgx_Pre_Flash_On);
         for(i=0;i<lux_val;i++)
         {
             udelay(1);
-            gpio_set_value(CAM_FLASH_ENSET,1);
+            gpio_set_value_cansleep(CAM_FLASH_ENSET, 1);
             udelay(1);
-            gpio_set_value(CAM_FLASH_ENSET,0);
+            gpio_set_value_cansleep(CAM_FLASH_ENSET, 0);
         }
-        gpio_set_value(CAM_FLASH_ENSET,1); //value set
+        gpio_set_value_cansleep(CAM_FLASH_ENSET, 1); //value set
     }
     s5k4ecgx_status.flash_status = lux_val;
     
     /* setting a sensor #2*/
-        if(lux_val==PRE_FLASH_OFF)S5K4ECGX_WRITE_LIST(s5k4ecgx_Pre_Flash_Off)
-        else if(lux_val==FLASH_OFF && s5k4ecgx_status.afcanceled == false)S5K4ECGX_WRITE_LIST(s5k4ecgx_Main_Flash_Off)
-        else if(lux_val==FLASH_OFF && s5k4ecgx_status.afcanceled == true)S5K4ECGX_WRITE_LIST(s5k4ecgx_Pre_Flash_Off)
+        if(lux_val==PRE_FLASH_OFF)
+		S5K4ECGX_WRITE_LIST(s5k4ecgx_Pre_Flash_Off)
+        else if(lux_val==FLASH_OFF && s5k4ecgx_status.afcanceled == false)
+		S5K4ECGX_WRITE_LIST(s5k4ecgx_Main_Flash_Off)
+        else if(lux_val==FLASH_OFF && s5k4ecgx_status.afcanceled == true)
+		S5K4ECGX_WRITE_LIST(s5k4ecgx_Pre_Flash_Off)
     
     return 0;
 }
@@ -2250,11 +2288,6 @@ void s5k4ecgx_set_power(int status)
         mdelay(20);
         gpio_set_value(31, 0);  // CAM_VT go to HI-Z.
 
-        
-        /* initailize flash IC */
-        gpio_set_value(CAM_FLASH_ENSET, 0);
-        gpio_set_value(CAM_FLASH_FLEN, 0);
-
         //LDO Core 1.2v
         lp8720_i2c_write(0x06, 0x09);            //000 01001
         lp8720_i2c_write(0x07, 0x09);            //000 01001
@@ -2404,10 +2437,10 @@ void s5k4ecgx_set_power(int status)
         gpio_set_value(31, 0);  // CAM_VT_nSTBY
         gpio_set_value(132, 0); // CAM_VT_nRST
 
-        /* initailize flash IC */
-        gpio_set_value(CAM_FLASH_ENSET,0);
-        gpio_set_value(CAM_FLASH_FLEN,0);
-        mdelay(1); // to enter a shutdown mode        
+        if (!torch_mode_on) {
+        	gpio_set_value_cansleep(CAM_FLASH_ENSET, 0);
+        	gpio_set_value_cansleep(CAM_FLASH_FLEN, 0);
+        }     
 
 #elif defined(CONFIG_MACH_APACHE)
 
@@ -2966,7 +2999,6 @@ static struct i2c_driver s5k4ecgx_i2c_driver = {
     },
 };
 
-
 #ifdef FACTORY_CHECK
 ssize_t camtype_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
@@ -2987,6 +3019,39 @@ extern struct class *sec_class;
 struct device *sec_cam_dev = NULL;
 #endif
 
+struct class *camera_class;
+struct device *s5k4ecgx_dev;
+static ssize_t cameraflash_file_cmd_show(struct device *dev,
+	struct device_attribute *attr, char *buf)
+{
+	/* Reserved */
+	return 0;
+}
+
+static ssize_t cameraflash_file_cmd_store(struct device *dev,
+	struct device_attribute *attr, const char *buf, size_t size)
+{
+	int value;
+
+	sscanf(buf, "%d", &value);
+
+	if (value == 0) {
+		printk(KERN_INFO "[Factory Test] flash OFF\n");
+		s5k4ecgx_factory_flash(FLASH_OFF);
+		torch_mode_on = 0;
+	} else {
+		printk(KERN_INFO
+			"[Factory Test] flash ON at value = %d\n",
+			value);
+		s5k4ecgx_factory_flash(value);
+		torch_mode_on = 1;
+	}
+
+	return size;
+}
+
+static DEVICE_ATTR(rear_flash,
+	0666, cameraflash_file_cmd_show, cameraflash_file_cmd_store);
 
 static int s5k4ecgx_sensor_probe(const struct msm_camera_sensor_info *info,
                 struct msm_sensor_ctrl *s)
@@ -3058,14 +3123,27 @@ probe_done:
 
 static int __s5k4ecgx_probe(struct platform_device *pdev)
 {
-//latin_cam : support anti-banding
-#if defined(CONFIG_SAMSUNG_LTN_COMMON)
+
+#if defined(CONFIG_SAMSUNG_LTN_COMMON) /* latin_cam : support anti-banding */
     int rv;
     rv = device_create_file(&pdev->dev,&s5k4ecgx_antibanding_attr);
     if(rv)    
         printk("<=PCAM=> s5k4ecgx_probe() : device_create_file() is failed with %d", rv);
-#endif //CONFIG_SAMSUNG_LTN_COMMON
-//hmin84.park 101130
+#endif
+
+    camera_class = class_create(THIS_MODULE, "camera");
+    if (IS_ERR(camera_class))
+	    pr_err("Failed to create class(camera)!\n");
+	    s5k4ecgx_dev =
+		    device_create(camera_class, NULL, 0, NULL, "rear");
+    if (IS_ERR(s5k4ecgx_dev)) {
+	    pr_err("Failed to create device!");
+    }
+
+    if (device_create_file(s5k4ecgx_dev, &dev_attr_rear_flash) < 0) {
+	pr_err("failed to create device file, %s\n",
+	dev_attr_rear_flash.attr.name);
+    }
 
 #ifdef FACTORY_CHECK                                                                      
     {                                                                                     
